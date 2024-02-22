@@ -17,7 +17,7 @@
     <div class="img">
       <!-- 展示图片 -->
       <el-image style="width: 100%; height: 100%;" :src="showimg(proofImage)" :v-if="Visible" fit="scale-down"
-        loading="lazy">
+        loading="lazy" @click="handleImageClick($event)">
         <template #error>
           <div class="image-slot">
             <el-icon><icon-picture /></el-icon>
@@ -28,7 +28,9 @@
 
     <!-- 标注数据 -->
     <div class="sign">
-      
+      <ul>
+        <li v-for="(point, index) in points" :key="index">点{{index + 1}}: ({{point.x.toFixed(2)}}, {{point.y.toFixed(2)}})</li>
+      </ul>
     </div>
 
   </div>
@@ -42,6 +44,7 @@ export default {
       Visible: false,
       dialogImageUrl: null,
       proofImage: null,
+      points: [] // 存储标点的坐标
     }
   },
   methods: {
@@ -87,8 +90,19 @@ export default {
       let url;
       url = 'data:image/png;base64,' + img;
       return url;
-    }
+    },
 
+    // 处理图片点击
+    handleImageClick(event) {
+      // 获取图片的宽度和高度
+      const imgWidth = event.target.width
+      const imgHeight = event.target.height
+      // 获取点击的位置相对于图片左上角的坐标
+      const x = event.offsetX / imgWidth
+      const y = event.offsetY / imgHeight
+      // 添加到points数组中
+      this.points.push({x, y})
+    }
   },
 }
 </script>
