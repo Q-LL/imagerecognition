@@ -16,14 +16,12 @@
 
     <div class="img">
       <!-- 展示图片 -->
-      <el-image style="" :src="showimg(proofImage)" :v-if="Visible" fit="fit" loading="lazy"
-        @click="handleImageClick($event)">
-        <template #error>
-          <div class="image-slot">
-            <el-icon><icon-picture /></el-icon>
-          </div>
-        </template>
-      </el-image>
+      <div class="image-container">
+        <el-image style="" :src="showimg(proofImage)" :v-if="Visible" fit="fit" loading="lazy"
+        @click="handleImageClick($event)"></el-image>
+        //:src="showimg(proofImage)" v-if="Visible" @click="handleImageClick($event)" />
+        <div v-for="(point, index) in points" :key="index" class="point" :style="{ left: point.x + 'px', top: point.y + 'px' }"></div>
+      </div>
     </div>
 
     <!-- 展示标注数据 -->
@@ -32,8 +30,16 @@
         <el-table-column prop="id" label="id" width="50" />
         <el-table-column prop="x" label="x轴坐标" width="180" />
         <el-table-column prop="y" label="y轴坐标" width="180" />
-        <el-table-column label="半径"> <template #default="scope"><el-input v-model="pointsradios[scope.row.id - 1]" placeholder="请输入半径" size="small"></el-input></template></el-table-column>
-        <el-table-column label="操作"><template #default="scope"><el-button size="small" type="danger" @click="delpoint(scope.row.id)">删除</el-button></template></el-table-column>
+        <el-table-column label="半径"> 
+          <template #default="scope">
+            <el-input v-model="pointsradios[scope.$index]" placeholder="请输入半径" size="small"></el-input>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作">
+          <template #default="scope">
+            <el-button size="small" type="danger" :disabled="isDeleteDisabled(scope.row.id)" @click="delpoint(scope.row.id)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
 
@@ -54,31 +60,28 @@ export default {
       points: [], // 存储标点的坐标
       pointsradios: [],//储存标点半径
       // 存储图片宽高
-      localx: null, 
+      localx: null,
       localy: null,
     }
   },
+
   methods: {
     getFile(file, fileList) {
       this.getBase64(file.raw).then(res => {
         const params = res.split(',')
-        //console.log(params, 'params')
         if (params.length > 0) {
-          this.proofImage = params[1]
-          // 创建一个新的 Image 对象
+          this.proofImage = params[1];
           const image = new Image();
           image.src = res;
           // 当图片加载完成后执行回调函数
           image.onload = () => {
             this.localx = image.width;
             this.localy = image.height;
-            //console.log(this.localx, this.localy);
           }
         }
         this.Visible = true;
       })
     },
-
 
     // 获取图片转base64
     getBase64(file) {
@@ -129,15 +132,30 @@ export default {
       this.points.push({ id, x, y })
     },
     //删除某一标点
-    delpoint(id){
+    delpoint(id) {
       const index = this.points.findIndex(point => point.id === id);
       this.points.splice(index, 1);
       this.pointsradios.splice(index, 1);
       this.pointsid = this.pointsid - 1;
-      //console.log(this.pointsradios);
+    },
+    isDeleteDisabled(id) {//判断按钮
+      const maxId = Math.max(...this.points.map(point => point.id));
+      return id !== maxId;
     }
-  },
+  }
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.image-container {
+  position: relative;
+}
+
+.point {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+}
+</style>
