@@ -16,8 +16,8 @@
 
     <div class="img">
       <!-- 展示图片 -->
-      <el-image style="width: 100%; height: 100%;" :src="showimg(proofImage)" :v-if="Visible" fit="scale-down"
-        loading="lazy" @click="handleImageClick($event)">
+      <el-image style="" :src="showimg(proofImage)" :v-if="Visible" fit="fit" loading="lazy"
+        @click="handleImageClick($event)">
         <template #error>
           <div class="image-slot">
             <el-icon><icon-picture /></el-icon>
@@ -26,12 +26,18 @@
       </el-image>
     </div>
 
-    <!-- 标注数据 -->
+    <!-- 展示标注数据 -->
     <div class="sign">
-      <ul>
-        <li v-for="(point, index) in points" :key="index">点{{index + 1}}: ({{point.x.toFixed(2)}}, {{point.y.toFixed(2)}})</li>
-      </ul>
+      <el-table :data="points" v-if="Visible" style="width: 100%">
+        <el-table-column prop="id" label="id" width="50" />
+        <el-table-column prop="x" label="x轴坐标" width="180" />
+        <el-table-column prop="y" label="y轴坐标" width="180" />
+        <el-table-column label="半径"> <template #default="scope"><el-input v-model="pointsradios[scope.row.id - 1]" placeholder="请输入半径" size="small"></el-input></template></el-table-column>
+        <el-table-column label="操作"><template #default="scope"><el-button size="small" type="danger" @click="delpoint(scope.row.id)">删除</el-button></template></el-table-column>
+      </el-table>
     </div>
+
+    <!-- 开始处理 -->
 
   </div>
 </template>
@@ -44,19 +50,35 @@ export default {
       Visible: false,
       dialogImageUrl: null,
       proofImage: null,
-      points: [] // 存储标点的坐标
+      pointsid: 0,//点的个数
+      points: [], // 存储标点的坐标
+      pointsradios: [],//储存标点半径
+      // 存储图片宽高
+      localx: null, 
+      localy: null,
     }
   },
   methods: {
     getFile(file, fileList) {
       this.getBase64(file.raw).then(res => {
         const params = res.split(',')
-        console.log(params, 'params')
+        //console.log(params, 'params')
         if (params.length > 0) {
           this.proofImage = params[1]
+          // 创建一个新的 Image 对象
+          const image = new Image();
+          image.src = res;
+          // 当图片加载完成后执行回调函数
+          image.onload = () => {
+            this.localx = image.width;
+            this.localy = image.height;
+            //console.log(this.localx, this.localy);
+          }
         }
+        this.Visible = true;
       })
     },
+
 
     // 获取图片转base64
     getBase64(file) {
@@ -77,12 +99,15 @@ export default {
     },
     handleUploadRemove(file, fileList) {
       this.proofImage = '';
+      this.pointsid = 0;
+      this.points = [];
+      this.localx = null;
+      this.localy = null;
       this.Visible = false;
     },
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
-      this.Visible = true;
     },
 
     //显示图片
@@ -94,23 +119,25 @@ export default {
 
     // 处理图片点击
     handleImageClick(event) {
-      // 获取图片的宽度和高度
-      const imgWidth = event.target.width
-      const imgHeight = event.target.height
-      // 获取点击的位置相对于图片左上角的坐标
-      const x = event.offsetX / imgWidth
-      const y = event.offsetY / imgHeight
+      const imgWidth = event.target.width;
+      const imgHeight = event.target.height;
+      const x = (event.offsetX / imgWidth) * this.localx;
+      const y = (event.offsetY / imgHeight) * this.localy;
       // 添加到points数组中
-      this.points.push({x, y})
+      this.pointsid = this.pointsid + 1;
+      const id = this.pointsid;
+      this.points.push({ id, x, y })
+    },
+    //删除某一标点
+    delpoint(id){
+      const index = this.points.findIndex(point => point.id === id);
+      this.points.splice(index, 1);
+      this.pointsradios.splice(index, 1);
+      this.pointsid = this.pointsid - 1;
+      //console.log(this.pointsradios);
     }
   },
 }
 </script>
 
-<style scoped>
-.img {
-  width: 100vw;
-  height: 50vh;
-  background-color: #b1adad;
-}
-</style>
+<style scoped></style>
