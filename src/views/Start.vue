@@ -32,18 +32,19 @@
         <el-table-column prop="id" label="id" width="50" />
         <el-table-column prop="x" label="x轴坐标" width="180" />
         <el-table-column prop="y" label="y轴坐标" width="180" />
-        <el-table-column label="半径"> <template #default="scope"><el-input v-model="pointsradios[scope.row.id - 1]"
-              placeholder="请输入半径" size="small"></el-input></template></el-table-column>
+        <el-table-column label="半径"> <template #default="scope"><el-input v-model="pointsradios[scope.row.id - 1]" placeholder="请输入半径" size="small"></el-input></template></el-table-column>
         <el-table-column label="操作"><template #default="scope"><el-button size="small" type="danger" :disabled="isDeleteDisabled(scope.row.id)" @click="delpoint(scope.row.id)">删除</el-button></template></el-table-column>
-      </el-table>￼
+      </el-table>
     </div>
 
     <!-- 开始处理 -->
-
+    <el-button>开始处理</el-button>
   </div>
 </template>
 
 <script>
+import axios from '@/axios';
+
 export default {
   data() {
     return {
