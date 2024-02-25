@@ -4,13 +4,17 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "serrve": "vue-cli-service serve --max-old-space-size=8192"
+
   },
   "dependencies": {
     "@vueuse/core": "^10.7.2",
     "axios": "^1.6.7",
     "core-js": "^3.8.3",
     "element-plus": "^2.5.6",
+    "opencv.js": "^1.2.1",
+    "opencv4js": "^3.4.3",
     "unplugin-auto-import": "^0.16.1",
     "unplugin-vue-components": "^0.25.2",
     "vue": "^3.2.13",

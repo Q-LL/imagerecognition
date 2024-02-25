@@ -44,6 +44,7 @@
 
 <script>
 import axios from '@/axios';
+import cv from '@/opencv';
 
 export default {
   data() {
@@ -59,6 +60,10 @@ export default {
       localx: null,
       localy: null,
     }
+  },
+
+  mounted(){
+    console.log(cv);
   },
 
   methods: {
