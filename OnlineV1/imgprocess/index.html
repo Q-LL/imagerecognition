@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing</title>
+</head>
+<body>
+    <h1>Image Processing</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" accept="image/*" required><br><br>
+        <label for="circles">Circles:</label><br>
+        <textarea id="circles" rows="4" cols="50">
+425,1077,60
+909,1062,60
+1438,1054,60
+1937,1099,60
+2466,1009,60
+2957,1084,60
+3449,1032,60
+3978,1077,60
+4492,1032,60
+5013,1054,60
+5534,1032,60
+        </textarea><br><br>
+        <label for="function">Function:</label><br>
+        <input type="text" id="function" required><br><br>
+        <label for="xValue">X Values:</label><br>
+        <textarea id="xValue" rows="4" cols="50">
+0
+100
+200
+300
+400
+500
+600
+700
+800
+900
+1000
+        </textarea><br><br>
+        <button type="button" onclick="sendData()">Process Image</button>
+        <p id="result">a</p>
+    </form>
+
+    <script>
+
+async function sendData() {
+    var fileInput = document.getElementById('fileInput');
+    var circles = document.getElementById('circles').value;
+    var func = document.getElementById('function').value;
+    var xValue = document.getElementById('xValue').value;
+    const ws = new WebSocket("ws://127.0.0.1:8000/");
+
+    var file = fileInput.files[0];
+    var reader = new FileReader();
+
+    ws.onopen = function(wsevent) {
+        console.log('WebSocket 3', wsevent);
+
+        reader.onload = function(readerEvent) {
+            var imageData = {
+                "image": readerEvent.target.result,
+                "circles": circles,
+                "function": func,
+                "xValue": xValue
+            };
+            console.log(JSON.stringify(imageData));
+            ws.send(JSON.stringify(imageData));
+        };
+        
+        // 将文件读取操作放置在 WebSocket 连接建立成功后的回调函数中
+        reader.readAsDataURL(file);
+    };
+
+    ws.onmessage = function(event) {
+        console.log(event.data);
+        const dataRecv = JSON.parse(event.data);
+        if(dataRecv.status == "success")
+        {
+            resultText = document.getElementById("result");
+            resultText.innerHTML = "y="+dataRecv.result[0].toExponential(3)+"x+"+dataRecv.result[1].toFixed(3)+"R2="+dataRecv.result[2].toFixed(3);
+        }
+    };
+}
+
+    </script>
+</body>
+</html>

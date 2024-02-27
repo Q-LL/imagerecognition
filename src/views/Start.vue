@@ -14,6 +14,11 @@
       </el-upload>
     </div>
 
+    <!-- 半径滑块 -->
+    <div class="circle">
+      <el-slider v-model="circle" :min="5" :max="100" show-input />
+    </div>
+
     <div class="img">
       <!-- 展示图片 -->
       <el-image style="" :src="showimg(proofImage)" :v-if="Visible" fit="fit" loading="lazy"
@@ -32,18 +37,32 @@
         <el-table-column prop="id" label="id" width="50" />
         <el-table-column prop="x" label="x轴坐标" width="180" />
         <el-table-column prop="y" label="y轴坐标" width="180" />
-        <el-table-column label="半径"> <template #default="scope"><el-input v-model="pointsradios[scope.row.id - 1]" placeholder="请输入半径" size="small"></el-input></template></el-table-column>
-        <el-table-column label="操作"><template #default="scope"><el-button size="small" type="danger" :disabled="isDeleteDisabled(scope.row.id)" @click="delpoint(scope.row.id)">删除</el-button></template></el-table-column>
+        <el-table-column prop="cir" label="半径" width="180" />
+        <el-table-column label="操作"><template #default="scope"><el-button size="small" type="danger"
+              :disabled="isDeleteDisabled(scope.row.id)" @click="delpoint(scope.row.id)">删除</el-button></template>
+        </el-table-column>
+        <el-table-column label="xValue"><template #default="scope"><el-input v-model="xValue[scope.row.id-1]" placeholder="请输入xValue"></el-input></template>
+        </el-table-column>
       </el-table>
     </div>
 
+    <!-- 用户输入数据 -->
+    <div class="input">
+      Function:<el-input v-model="functions" class="custom-input" placeholder="请输入 Function"></el-input>
+    </div>
+
     <!-- 开始处理 -->
-    <el-button>开始处理</el-button>
+    <el-button @click="makedata()">开始处理</el-button>
+  </div>
+
+  <!-- test show -->
+  <div>
+    {{ message }}
   </div>
 </template>
 
 <script>
-import axios from '@/axios';
+import { connectWebSocket } from '@/axios';
 import cv from '@/opencv';
 
 export default {
@@ -55,15 +74,24 @@ export default {
       proofImage: null,
       pointsid: 0,//点的个数
       points: [], // 存储标点的坐标
-      pointsradios: [],//储存标点半径
+      circle: 5,//滑块半径
       // 存储图片宽高
       localx: null,
       localy: null,
+
+      //用户输入数据
+      functions: null,
+      xValue: [],
+
+      //axios
+      pendingData: null, //待发送的数据
+      message: 'Connecting...',
+      socket: null,
     }
   },
 
-  mounted(){
-    console.log(cv);
+  mounted() {
+
   },
 
   methods: {
@@ -72,7 +100,7 @@ export default {
         const params = res.split(',')
         //console.log(params, 'params')
         if (params.length > 0) {
-          this.proofImage = params[1];
+          this.proofImage = params;
           const image = new Image();
           image.src = res;
           // 当图片加载完成后执行回调函数
@@ -120,7 +148,7 @@ export default {
     //显示图片
     showimg(img) {
       let url;
-      url = 'data:image/png;base64,' + img;
+      url = img;
       return url;
     },
 
@@ -128,28 +156,75 @@ export default {
     handleImageClick(event) {
       const imgWidth = event.target.width;
       const imgHeight = event.target.height;
-      const x = (event.offsetX / imgWidth) * this.localx;
-      const y = (event.offsetY / imgHeight) * this.localy;
+      const x = Math.round((event.offsetX / imgWidth) * this.localx);
+      const y = Math.round((event.offsetY / imgHeight) * this.localy);
       // 添加到points数组中
       this.pointsid = this.pointsid + 1;
       const id = this.pointsid;
-      this.points.push({ id, x, y })
+      const cir = this.circle;
+      this.points.push({ id, x, y, cir })
     },
     //删除某一标点
     delpoint(id) {
       const index = this.points.findIndex(point => point.id === id);
       this.points.splice(index, 1);
-      this.pointsradios.splice(index, 1);
       this.pointsid = this.pointsid - 1;
       //console.log(this.pointsradios);
     },
     isDeleteDisabled(id) {//判断按钮
       const maxId = Math.max(...this.points.map(point => point.id));
       return id !== maxId;
+    },
+
+    //处理数据
+    makedata() {
+      // 创建一个空对象
+      const dataToSend = {};
+      dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
+      dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
+      dataToSend.function = this.functions;
+      dataToSend.xValue = this.xValue.join("\n");
+      const jsonToSend = JSON.stringify(dataToSend);
+      this.pendingData = jsonToSend;
+      console.log(this.pendingData);
+      //发送数据
+      this.handleProcess(this.pendingData);
+    },
+    //按按钮发送数据
+    handleProcess(data) {
+      // 定义处理方法，调用connectWebSocket函数，返回一个promise对象
+      // 把你的图片和标注数据作为参数传给connectWebSocket函数
+      connectWebSocket(data)
+        .then(socket => {
+          this.socket = socket
+          this.message = 'Connected'
+          this.socket.onmessage = event => {
+            this.message = event.data
+          }
+          this.socket.onclose = () => {
+            this.message = 'Disconnected'
+          }
+        })
+        .catch(error => {
+          // 处理错误，这里只是简单地显示在页面上
+          this.message = error.message
+        })
     }
 
   },
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.circle {
+  margin: auto;
+  margin-bottom: 10px;
+  width: 80%;
+}
+
+.custom-input {
+  padding-left: 10px;
+  padding-bottom: 10px;
+  width: 180px;
+}
+</style>
