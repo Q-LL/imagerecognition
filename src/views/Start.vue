@@ -58,6 +58,10 @@
   <!-- test show -->
   <div>
     {{ message }}
+    <br>
+    {{ resultt }}
+    <br>
+    {{ statuss }}
   </div>
 </template>
 
@@ -80,13 +84,17 @@ export default {
       localy: null,
 
       //用户输入数据
-      functions: null,
-      xValue: [],
+      functions: 'R/G',
+      xValue: [0,100,200,300,400,500,600,700,800,900,1000],
 
       //axios
       pendingData: null, //待发送的数据
-      message: 'Connecting...',
+      message: null, //数据
       socket: null,
+      statuss: '未连接',
+
+      //结果数据
+      resultt:null,
     }
   },
 
@@ -186,7 +194,7 @@ export default {
       dataToSend.xValue = this.xValue.join("\n");
       const jsonToSend = JSON.stringify(dataToSend);
       this.pendingData = jsonToSend;
-      console.log(this.pendingData);
+      //console.log(this.pendingData);
       //发送数据
       this.handleProcess(this.pendingData);
     },
@@ -196,18 +204,21 @@ export default {
       // 把你的图片和标注数据作为参数传给connectWebSocket函数
       connectWebSocket(data)
         .then(socket => {
-          this.socket = socket
-          this.message = 'Connected'
+          this.socket = socket;
+          this.statuss = '已建立连接';
           this.socket.onmessage = event => {
-            this.message = event.data
+            this.message = JSON.parse(event.data);
+            this.message = this.message.result;
+            console.log(this.message);
+            this.resultt = "y="+this.message[0].toExponential(3)+"x+"+this.message[1].toFixed(3)+"R2="+this.message[2].toFixed(3);
           }
           this.socket.onclose = () => {
-            this.message = 'Disconnected'
+            this.statuss = '已经关闭连接';
           }
         })
         .catch(error => {
           // 处理错误，这里只是简单地显示在页面上
-          this.message = error.message
+          this.statuss = error.message;
         })
     }
 
