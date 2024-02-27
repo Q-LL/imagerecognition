@@ -16,19 +16,17 @@
 
     <!-- 半径滑块 -->
     <div class="circle">
-      <el-slider v-model="circle" :min="5" :max="100" show-input />
+      <div class="silder"><el-slider v-model="circle" :min="5" :max="100" show-input /></div>
+      <div class="circle-preview"
+        :style="{ width: (2 * circle * this.scale) + 'px', height: (2 * circle * this.scale) + 'px' }"></div>
     </div>
 
-    <div class="img">
-      <!-- 展示图片 -->
-      <el-image style="" :src="showimg(proofImage)" :v-if="Visible" fit="fit" loading="lazy"
-        @click="handleImageClick($event)">
-        <template #error>
-          <div class="image-slot">
-            <el-icon><icon-picture /></el-icon>
-          </div>
-        </template>
-      </el-image>
+    <!-- 展示图片 -->
+    <div class="image-container">
+      <img :src="showimg(proofImage)" v-if="Visible" @click="handleImageClick($event)" />
+      <div v-for="(point, index) in scaledPoints" :key="index" class="point"
+        :style="{ left: point.x - (point.cir * this.scale) + 'px', top: point.y - (point.cir * this.scale) + 'px', width: (2 * point.cir * this.scale) + 'px', height: (2 * point.cir * this.scale) + 'px' }">
+      </div>
     </div>
 
     <!-- 展示标注数据 -->
@@ -41,7 +39,8 @@
         <el-table-column label="操作"><template #default="scope"><el-button size="small" type="danger"
               :disabled="isDeleteDisabled(scope.row.id)" @click="delpoint(scope.row.id)">删除</el-button></template>
         </el-table-column>
-        <el-table-column label="xValue"><template #default="scope"><el-input v-model="xValue[scope.row.id-1]" placeholder="请输入xValue"></el-input></template>
+        <el-table-column label="xValue"><template #default="scope"><el-input v-model="xValue[scope.row.id - 1]"
+              placeholder="请输入xValue"></el-input></template>
         </el-table-column>
       </el-table>
     </div>
@@ -67,7 +66,6 @@
 
 <script>
 import { connectWebSocket } from '@/axios';
-import cv from '@/opencv';
 
 export default {
   data() {
@@ -83,9 +81,12 @@ export default {
       localx: null,
       localy: null,
 
+      scale: 1, // 图片缩放比例，默认为1，即不缩放
+      scaledPoints: [], // 保存根据缩放比例调整后的标点位置
+
       //用户输入数据
       functions: 'R/G',
-      xValue: [0,100,200,300,400,500,600,700,800,900,1000],
+      xValue: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
 
       //axios
       pendingData: null, //待发送的数据
@@ -94,12 +95,8 @@ export default {
       statuss: '未连接',
 
       //结果数据
-      resultt:null,
+      resultt: null,
     }
-  },
-
-  mounted() {
-
   },
 
   methods: {
@@ -115,7 +112,6 @@ export default {
           image.onload = () => {
             this.localx = image.width;
             this.localy = image.height;
-            //console.log(this.localx, this.localy);
           }
         }
         this.Visible = true;
@@ -144,6 +140,7 @@ export default {
       this.proofImage = '';
       this.pointsid = 0;
       this.points = [];
+      this.scaledPoints = [];
       this.localx = null;
       this.localy = null;
       this.Visible = false;
@@ -164,18 +161,29 @@ export default {
     handleImageClick(event) {
       const imgWidth = event.target.width;
       const imgHeight = event.target.height;
+      const img = event.target;// 获取图片元素的引用
+      const displayWidth = img.getBoundingClientRect().width;// 获取图片的显示宽度
+      //console.log(displayWidth);
+      this.scale = displayWidth / this.localx;
+      //console.log(this.scale);
       const x = Math.round((event.offsetX / imgWidth) * this.localx);
       const y = Math.round((event.offsetY / imgHeight) * this.localy);
       // 添加到points数组中
       this.pointsid = this.pointsid + 1;
       const id = this.pointsid;
       const cir = this.circle;
-      this.points.push({ id, x, y, cir })
+      this.points.push({ id, x, y, cir });
+      const scaledX = Math.round(x * this.scale);
+      const scaledY = Math.round(y * this.scale);
+      // 将调整后的标点位置保存到 scaledPoints 数组中
+      this.scaledPoints.push({ id, x: scaledX, y: scaledY, cir })
+      //console.log(this.scaledPoints);
     },
     //删除某一标点
     delpoint(id) {
       const index = this.points.findIndex(point => point.id === id);
       this.points.splice(index, 1);
+      this.scaledPoints.splice(index, 1);
       this.pointsid = this.pointsid - 1;
       //console.log(this.pointsradios);
     },
@@ -200,8 +208,6 @@ export default {
     },
     //按按钮发送数据
     handleProcess(data) {
-      // 定义处理方法，调用connectWebSocket函数，返回一个promise对象
-      // 把你的图片和标注数据作为参数传给connectWebSocket函数
       connectWebSocket(data)
         .then(socket => {
           this.socket = socket;
@@ -210,7 +216,7 @@ export default {
             this.message = JSON.parse(event.data);
             this.message = this.message.result;
             console.log(this.message);
-            this.resultt = "y="+this.message[0].toExponential(3)+"x+"+this.message[1].toFixed(3)+"R2="+this.message[2].toFixed(3);
+            this.resultt = "y=" + this.message[0].toExponential(3) + "x+" + this.message[1].toFixed(3) + "R2=" + this.message[2].toFixed(3);
           }
           this.socket.onclose = () => {
             this.statuss = '已经关闭连接';
@@ -228,14 +234,51 @@ export default {
 
 <style scoped>
 .circle {
+  display: flex;
+  align-items: center;
   margin: auto;
-  margin-bottom: 10px;
   width: 80%;
+}
+
+.circle .silder {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  width: 80%;
+}
+
+.circle .circle-preview {
+  margin-left: 20px;
+  margin-top: 10px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgb(215, 26, 26);
+  border-radius: 50%;
 }
 
 .custom-input {
   padding-left: 10px;
   padding-bottom: 10px;
   width: 180px;
+}
+
+.image-container {
+  position: relative;
+}
+
+.point {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  /* 可以根据需要修改标点的样式 */
+  border-radius: 50%;
+}
+</style>
+
+<style>
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 </style>
