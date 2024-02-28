@@ -62,7 +62,7 @@
 
     <!-- 开始处理 -->
     <div class="button">
-      <el-button @click="laststep()">上一步</el-button>
+      <el-button @click="laststep()" :disabled ="steps<=0">上一步</el-button>
       <el-button @click="nextstep()" v-if="steps!=2">下一步</el-button>
       <el-button @click="makedata()" v-if="steps==2">开始处理</el-button>
     </div>
@@ -250,7 +250,7 @@ export default {
       this.steps = this.steps+1;
     },
     laststep(){
-      this.steps = this.steps+1;
+      this.steps = this.steps-1;
     }
 
   },
