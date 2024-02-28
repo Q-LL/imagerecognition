@@ -7,6 +7,7 @@
     <div class="step" style="align-items: center; width: 98vw; ">
       <el-steps :active="steps" finish-status="success" align-center>
         <el-step title="上传图片" />
+        <el-step title="选择处理方法" />
         <el-step title="标注图片" />
         <el-step title="开始处理" />
       </el-steps>
@@ -25,14 +26,14 @@
     </div>
 
     <!-- 半径滑块 -->
-    <div class="circle" v-if="steps==1">
+    <div class="circle" v-if="steps==2">
       <div class="silder"><el-slider v-model="circle" :min="5" :max="100" show-input /></div>
       <div class="circle-preview"
         :style="{ width: (2 * circle * this.scale) + 'px', height: (2 * circle * this.scale) + 'px' }"></div>
     </div>
 
     <!-- 展示图片 -->
-    <div class="image-container" v-if="steps==1">
+    <div class="image-container" v-if="steps==2">
       <img :src="showimg(proofImage)" v-if="Visible" @click="handleImageClick($event)" />
       <div v-for="(point, index) in scaledPoints" :key="index" class="point"
         :style="{ left: point.x - (point.cir * this.scale) + 'px', top: point.y - (point.cir * this.scale) + 'px', width: (2 * point.cir * this.scale) + 'px', height: (2 * point.cir * this.scale) + 'px' }">
@@ -40,7 +41,7 @@
     </div>
 
     <!-- 展示标注数据 -->
-    <div class="sign" v-if="steps==1">
+    <div class="sign" v-if="steps==2">
       <el-table :data="points" v-if="Visible" style="width: 100%">
         <el-table-column prop="id" label="id" width="50" />
         <el-table-column prop="x" label="x轴坐标" width="180" />
@@ -56,15 +57,15 @@
     </div>
 
     <!-- 用户输入数据 -->
-    <div class="input" v-if="steps==1">
+    <div class="input" v-if="steps==2">
       Function:<el-input v-model="functions" class="custom-input" placeholder="请输入 Function"></el-input>
     </div>
 
     <!-- 开始处理 -->
     <div class="button">
       <el-button @click="laststep()" :disabled ="steps<=0">上一步</el-button>
-      <el-button @click="nextstep()" v-if="steps!=2">下一步</el-button>
-      <el-button @click="makedata()" v-if="steps==2">开始处理</el-button>
+      <el-button @click="nextstep()" v-if="steps!=3">下一步</el-button>
+      <el-button @click="makedata()" v-if="steps==3">开始处理</el-button>
     </div>
     
   </div>
