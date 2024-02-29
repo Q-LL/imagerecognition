@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div style="display: flex; justify-content: center; padding-bottom: 20px;">
     <h1>开始使用</h1>
   </div>
-  <div>
+  <div style="padding-bottom: 30px;">
     <!-- 步骤 -->
-    <div class="step" style="align-items: center; width: 98vw; ">
+    <div class="step">
       <el-steps :active="steps" finish-status="success" align-center>
         <el-step title="上传图片" />
         <el-step title="选择处理方法" />
@@ -13,27 +13,37 @@
       </el-steps>
     </div>
 
-    <div class="upload" v-if="steps==0">
-      <el-upload list-type="text" action='' accept=".jpg, .png" :limit="1" :auto-upload="false" :file-list="fileList"
-        :on-change="getFile" :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove">
-        <el-button size="small" type="primary">选择图片上传</el-button>
+    <div class="upload" v-if="steps == 0" style="text-align: center;">
+      <el-upload list-type="text" action='' accept=".jpg, .png" :limit="1" :auto-upload="false" :on-change="getFile"
+        :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove">
+        <el-button type="primary">选择图片上传</el-button>
         <br>
         <template #tip>
           <div slot="tip" class="el-upload__tip">只能上传一张jpg/png文件</div>
         </template>
       </el-upload>
-      <img :src="showimg(proofImage)" class="image-container" v-if="Visible"/>
+      <img :src="showimg(proofImage)" class="image-container" v-if="Visible" />
+    </div>
+
+    <!-- 选择方法 -->
+    <div class="card" v-if="steps == 1" style="width: 80%;">
+      <div>
+        <el-card shadow="hover" style="margin-bottom: 15vh; margin-top: 20px;"> Hover </el-card>
+      </div>
+      <div>
+        <el-card shadow="hover"> Hover </el-card>
+      </div>
     </div>
 
     <!-- 半径滑块 -->
-    <div class="circle" v-if="steps==2">
+    <div class="circle" v-if="steps == 2">
       <div class="silder"><el-slider v-model="circle" :min="5" :max="100" show-input /></div>
       <div class="circle-preview"
         :style="{ width: (2 * circle * this.scale) + 'px', height: (2 * circle * this.scale) + 'px' }"></div>
     </div>
 
     <!-- 展示图片 -->
-    <div class="image-container" v-if="steps==2">
+    <div class="image-container" v-if="steps == 2">
       <img :src="showimg(proofImage)" v-if="Visible" @click="handleImageClick($event)" />
       <div v-for="(point, index) in scaledPoints" :key="index" class="point"
         :style="{ left: point.x - (point.cir * this.scale) + 'px', top: point.y - (point.cir * this.scale) + 'px', width: (2 * point.cir * this.scale) + 'px', height: (2 * point.cir * this.scale) + 'px' }">
@@ -41,7 +51,7 @@
     </div>
 
     <!-- 展示标注数据 -->
-    <div class="sign" v-if="steps==2">
+    <div class="sign" v-if="steps == 2">
       <el-table :data="points" v-if="Visible" style="width: 100%">
         <el-table-column prop="id" label="id" width="50" />
         <el-table-column prop="x" label="x轴坐标" width="180" />
@@ -57,26 +67,27 @@
     </div>
 
     <!-- 用户输入数据 -->
-    <div class="input" v-if="steps==2">
+    <div class="input" v-if="steps == 2" style="text-align: center; padding-top: 20px; padding-bottom: 20px;">
       Function:<el-input v-model="functions" class="custom-input" placeholder="请输入 Function"></el-input>
     </div>
 
-    <!-- 开始处理 -->
-    <div class="button">
-      <el-button @click="laststep()" :disabled ="steps<=0">上一步</el-button>
-      <el-button @click="nextstep()" v-if="steps!=3">下一步</el-button>
-      <el-button @click="makedata()" v-if="steps==3">开始处理</el-button>
+    <!-- test show -->
+    <div v-if="steps == 4">
+      {{ message }}
+      <br>
+      {{ resultt }}
+      <br>
+      {{ statuss }}
     </div>
-    
-  </div>
 
-  <!-- test show -->
-  <div>
-    {{ message }}
-    <br>
-    {{ resultt }}
-    <br>
-    {{ statuss }}
+    <!-- 开始处理 -->
+    <div class="button" style="text-align: center; position: fixed; margin-top: 10px; bottom: 10px; width: 100%; z-index:10">
+      <el-button @click="laststep()" :disabled="steps <= 0" type="warning">上一步</el-button>
+      <el-button @click="nextstep()" v-if="steps < 3" type="primary">下一步</el-button>
+      <!-- <el-button @click="makedata()" v-if="steps==3" >开始处理</el-button> -->
+      <el-button @click="makedata()" v-if="steps == 3 || steps == 4" :loading="loading" :disabled="steps == 4 || loading "
+        :type="buttontype">{{ buttonText }}</el-button>
+    </div>
   </div>
 </template>
 
@@ -96,6 +107,7 @@ export default {
       // 存储图片宽高
       localx: null,
       localy: null,
+      choosemethod:1,//用户选择方法
 
       scale: 1, // 图片缩放比例，默认为1，即不缩放
       scaledPoints: [], // 保存根据缩放比例调整后的标点位置
@@ -113,7 +125,12 @@ export default {
       //结果数据
       resultt: null,
 
-      steps:0,//步骤条
+      steps: 0,//步骤条
+
+      //处理按钮
+      buttontype: 'primary',
+      loading: false,
+      buttonText: '开始处理',
     }
   },
 
@@ -230,6 +247,11 @@ export default {
         .then(socket => {
           this.socket = socket;
           this.statuss = '已建立连接';
+          //按钮
+          this.loading = true;
+          this.buttonText = '正在处理';
+          this.buttontype = 'warning';
+
           this.socket.onmessage = event => {
             this.message = JSON.parse(event.data);
             this.message = this.message.result;
@@ -238,6 +260,10 @@ export default {
           }
           this.socket.onclose = () => {
             this.statuss = '已经关闭连接';
+            this.loading = false;
+            this.buttontype = 'success';
+            this.buttonText = '处理完成';
+            this.steps = 4;
           }
         })
         .catch(error => {
@@ -247,11 +273,14 @@ export default {
     },
 
     //步骤
-    nextstep(){
-      this.steps = this.steps+1;
+    nextstep() {
+      this.steps = this.steps + 1;
     },
-    laststep(){
-      this.steps = this.steps-1;
+    laststep() {
+      if(this.steps == 4){
+        this.steps = this.steps -2;
+      }
+      else{this.steps = this.steps - 1;}
     }
 
   },
@@ -298,6 +327,12 @@ export default {
   background-color: red;
   /* 可以根据需要修改标点的样式 */
   border-radius: 50%;
+}
+
+.step {
+  align-items: center;
+  width: 98vw;
+  padding-bottom: 40px;
 }
 </style>
 
