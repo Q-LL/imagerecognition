@@ -8,8 +8,8 @@
       <el-steps :active="steps" finish-status="success" align-center>
         <el-step title="上传图片" />
         <el-step title="选择处理方法" />
-        <el-step title="标注图片" />
-        <el-step title="开始处理" />
+        <el-step title="标注图片及处理" />
+        <el-step title="展示数据" />
       </el-steps>
     </div>
 
@@ -28,7 +28,8 @@
     <!-- 选择方法 -->
     <div class="card" v-if="steps == 1" style="width: 80%; margin: auto; padding: auto;">
       <div>
-        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" @click="choosemethod(1)"> 处理方式1 (默认) </el-card>
+        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" @click="choosemethod(1)"> 处理方式1 (默认)
+        </el-card>
       </div>
       <div>
         <el-card shadow="hover" @click="choosemethod(2)"> 处理方式2 </el-card>
@@ -68,26 +69,30 @@
 
     <!-- 用户输入数据 -->
     <div class="input" v-if="steps == 2" style="text-align: center; padding-top: 20px; padding-bottom: 20px;">
-      notAutoFunc <el-checkbox v-model="notAutoFunc"></el-checkbox>
-      <row v-if="!notAutoFunc">&nbsp;&nbsp;&nbsp;Function:<el-input class="custom-input"  v-model="functions" placeholder="请输入 Function"></el-input></row>
-      &nbsp;&nbsp;&nbsp;Goal:<el-input class="custom-input" v-model="Goal" placeholder="请输入 Goal(选填)"></el-input>
-      &nbsp;&nbsp;&nbsp;iteration:<el-input class="custom-input" v-model="iteration" placeholder="请输入 iteration(选填)"></el-input>
+      <row>Function:<el-input class="custom-input" v-model="functions" placeholder="请输入 Function"></el-input></row>
+      &nbsp;&nbsp;&nbsp;不使用自动方程 <el-checkbox v-model="notAutoFunc"></el-checkbox>
+      <row v-if="!notAutoFunc">&nbsp;&nbsp;&nbsp;Goal:<el-input class="custom-input" v-model="Goal"
+          placeholder="请输入 Goal(选填)"></el-input></row>
+      <row v-if="!notAutoFunc">&nbsp;&nbsp;&nbsp;iteration:<el-input class="custom-input" v-model="iteration"
+          placeholder="请输入 iteration(选填)"></el-input></row>
+      <div>
+        <el-button @click="makedata()" :loading="loading"
+          :disabled="loading" :type="buttontype">{{ buttonText }}</el-button>
+      </div>
     </div>
 
     <!-- test show -->
-    <div v-if="steps == 4">
+    <div v-if="steps == 2">
       {{ message }}
       <br>
       {{ resultt }}
     </div>
 
-    <!-- 开始处理 -->
-    <div class="button" style="text-align: center; position: fixed; margin-top: 10px; bottom: 10px; width: 100%; z-index:10">
+    <!-- 步骤条 -->
+    <div class="button"
+      style="text-align: center; position: fixed; margin-top: 10px; bottom: 10px; width: 100%; z-index:10">
       <el-button @click="laststep()" :disabled="steps <= 0" type="warning">上一步</el-button>
       <el-button @click="nextstep()" v-if="steps < 3" :disabled="!Visible" type="primary">下一步</el-button>
-      <!-- <el-button @click="makedata()" v-if="steps==3" >开始处理</el-button> -->
-      <el-button @click="makedata()" v-if="steps == 3 || steps == 4" :loading="loading" :disabled="steps == 4 || loading "
-        :type="buttontype">{{ buttonText }}</el-button>
     </div>
   </div>
 </template>
@@ -101,7 +106,7 @@ export default {
       dialogVisible: false,
       Visible: false,
       dialogImageUrl: null,
-  
+
       // 存储图片宽高
       localx: null,
       localy: null,
@@ -116,10 +121,10 @@ export default {
       circle: 5,//滑块半径
       functions: 'R/G',
       xValue: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
-      Goal:'',
-      iteration:'',
-      methord:false,
-      notAutoFunc:false,
+      Goal: '',
+      iteration: '',
+      methord: false,
+      notAutoFunc: false,
 
 
       //axios
@@ -234,14 +239,14 @@ export default {
     },
 
     // 选择方法1，2
-    choosemethod(num){
-      if(num == 1){
+    choosemethod(num) {
+      if (num == 1) {
         this.methord = false;
       }
-      else if (num == 2){
+      else if (num == 2) {
         this.methord = true;
       }
-      else{
+      else {
         // 抛出错误弹窗
       }
       this.steps = this.steps + 1;
@@ -252,6 +257,10 @@ export default {
     makedata() {
       // 创建一个空对象
       const dataToSend = {};
+      if(this.notAutoFunc == true){
+        this.Goal = '';
+        this.iteration = '';
+      }
       dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
       dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
       dataToSend.function = this.functions;
@@ -262,6 +271,7 @@ export default {
       dataToSend.iteration = this.iteration;
       const jsonToSend = JSON.stringify(dataToSend);
       this.pendingData = jsonToSend;
+      console.log(this.notAutoFunc);
       console.log(dataToSend);
       //发送数据
       this.handleProcess(this.pendingData);
@@ -279,14 +289,13 @@ export default {
           this.socket.onmessage = event => {
             this.message = JSON.parse(event.data);
             this.message = this.message.result;
-            console.log(this.message);
+            console.log(event);
             this.resultt = "y=" + this.message[0].toExponential(3) + "x+" + this.message[1].toFixed(3) + "R2=" + this.message[2].toFixed(3);
           }
           this.socket.onclose = () => {
             this.loading = false;
             this.buttontype = 'success';
             this.buttonText = '处理完成';
-            this.steps = 4;
           }
         })
         .catch(error => {
@@ -300,10 +309,10 @@ export default {
       this.steps = this.steps + 1;
     },
     laststep() {
-      if(this.steps == 4){
-        this.steps = this.steps -2;
+      if (this.steps == 4) {
+        this.steps = this.steps - 2;
       }
-      else{this.steps = this.steps - 1;}
+      else { this.steps = this.steps - 1; }
     }
 
   },
