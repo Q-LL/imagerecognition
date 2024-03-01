@@ -1,5 +1,5 @@
 <template>
-  <div style="display: flex; justify-content: center; padding-bottom: 20px;">
+  <div style="display: flex; justify-content: center; padding-bottom: 20px; padding-top: 20px;">
     <h1>开始使用</h1>
   </div>
   <div style="padding-bottom: 30px;">
@@ -26,12 +26,12 @@
     </div>
 
     <!-- 选择方法 -->
-    <div class="card" v-if="steps == 1" style="width: 80%;">
+    <div class="card" v-if="steps == 1" style="width: 80%; margin: auto; padding: auto;">
       <div>
-        <el-card shadow="hover" style="margin-bottom: 15vh; margin-top: 20px;"> Hover </el-card>
+        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" > 处理方式1 </el-card>
       </div>
       <div>
-        <el-card shadow="hover"> Hover </el-card>
+        <el-card shadow="hover"> 处理方式2 </el-card>
       </div>
     </div>
 
@@ -76,14 +76,12 @@
       {{ message }}
       <br>
       {{ resultt }}
-      <br>
-      {{ statuss }}
     </div>
 
     <!-- 开始处理 -->
     <div class="button" style="text-align: center; position: fixed; margin-top: 10px; bottom: 10px; width: 100%; z-index:10">
       <el-button @click="laststep()" :disabled="steps <= 0" type="warning">上一步</el-button>
-      <el-button @click="nextstep()" v-if="steps < 3" type="primary">下一步</el-button>
+      <el-button @click="nextstep()" v-if="steps < 3" :disabled="!Visible" type="primary">下一步</el-button>
       <!-- <el-button @click="makedata()" v-if="steps==3" >开始处理</el-button> -->
       <el-button @click="makedata()" v-if="steps == 3 || steps == 4" :loading="loading" :disabled="steps == 4 || loading "
         :type="buttontype">{{ buttonText }}</el-button>
@@ -246,7 +244,6 @@ export default {
       connectWebSocket(data)
         .then(socket => {
           this.socket = socket;
-          this.statuss = '已建立连接';
           //按钮
           this.loading = true;
           this.buttonText = '正在处理';
@@ -259,7 +256,6 @@ export default {
             this.resultt = "y=" + this.message[0].toExponential(3) + "x+" + this.message[1].toFixed(3) + "R2=" + this.message[2].toFixed(3);
           }
           this.socket.onclose = () => {
-            this.statuss = '已经关闭连接';
             this.loading = false;
             this.buttontype = 'success';
             this.buttonText = '处理完成';

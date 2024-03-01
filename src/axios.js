@@ -12,7 +12,7 @@ const instance = axios.create({
 function connectWebSocket (data) {
   return new Promise((resolve, reject) => {
     // 直接使用websocket的URL创建一个WebSocket对象
-    const socket = new WebSocket('ws://127.0.0.1:8000/') // 修改这里
+    const socket = new WebSocket('ws://127.0.0.1:8000/standard') // 修改这里
     // 设置websocket的事件监听器
     socket.onopen = () => {
       // 连接成功后，发送数据

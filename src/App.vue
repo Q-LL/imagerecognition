@@ -35,8 +35,17 @@ window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
 </script>
 
 <style>
+*{
+	margin:0;
+	padding:0;
+	border:0
+}
+
 .header{
   text-align: center;
-  
+  background-color: #0095ff;
+  width: 100vw;
+  height: 4vh;
+  padding-top: 1vh;
 }
 </style>
