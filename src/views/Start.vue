@@ -28,10 +28,10 @@
     <!-- 选择方法 -->
     <div class="card" v-if="steps == 1" style="width: 80%; margin: auto; padding: auto;">
       <div>
-        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" > 处理方式1 </el-card>
+        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" @click="choosemethod(1)"> 处理方式1 (默认) </el-card>
       </div>
       <div>
-        <el-card shadow="hover"> 处理方式2 </el-card>
+        <el-card shadow="hover" @click="choosemethod(2)"> 处理方式2 </el-card>
       </div>
     </div>
 
@@ -68,7 +68,10 @@
 
     <!-- 用户输入数据 -->
     <div class="input" v-if="steps == 2" style="text-align: center; padding-top: 20px; padding-bottom: 20px;">
-      Function:<el-input v-model="functions" class="custom-input" placeholder="请输入 Function"></el-input>
+      notAutoFunc:<el-input class="custom-input" v-model="notAutoFunc" placeholder="请输入 notAutoFunc"></el-input>
+      Function:<el-input class="custom-input" v-model="functions" placeholder="请输入 Function"></el-input>
+      Goal:<el-input class="custom-input" v-model="Goal" placeholder="请输入 Goal"></el-input>
+      iteration:<el-input class="custom-input" v-model="iteration" placeholder="请输入 iteration"></el-input>
     </div>
 
     <!-- test show -->
@@ -98,21 +101,26 @@ export default {
       dialogVisible: false,
       Visible: false,
       dialogImageUrl: null,
-      proofImage: null,
-      pointsid: 0,//点的个数
-      points: [], // 存储标点的坐标
-      circle: 5,//滑块半径
+  
       // 存储图片宽高
       localx: null,
       localy: null,
-      choosemethod:1,//用户选择方法
 
       scale: 1, // 图片缩放比例，默认为1，即不缩放
       scaledPoints: [], // 保存根据缩放比例调整后的标点位置
 
-      //用户输入数据
+      //传出参数
+      proofImage: null,
+      pointsid: 0,//点的个数
+      points: [], // 存储标点的坐标
+      circle: 5,//滑块半径
       functions: 'R/G',
       xValue: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+      Goal:'',
+      iteration:'',
+      methord:false,
+      notAutoFunc:false,
+
 
       //axios
       pendingData: null, //待发送的数据
@@ -225,6 +233,21 @@ export default {
       return id !== maxId;
     },
 
+    // 选择方法1，2
+    choosemethod(num){
+      if(num == 1){
+        this.methord = false;
+      }
+      else if (num == 2){
+        this.methord = true;
+      }
+      else{
+        // 抛出错误弹窗
+      }
+      this.steps = this.steps + 1;
+      console.log(this.methord);
+    },
+
     //处理数据
     makedata() {
       // 创建一个空对象
@@ -233,9 +256,13 @@ export default {
       dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
       dataToSend.function = this.functions;
       dataToSend.xValue = this.xValue.join("\n");
+      dataToSend.Goal = this.Goal;
+      dataToSend.methord = this.methord;
+      dataToSend.notAutoFunc = this.notAutoFunc;
+      dataToSend.iteration = this.iteration;
       const jsonToSend = JSON.stringify(dataToSend);
       this.pendingData = jsonToSend;
-      //console.log(this.pendingData);
+      console.log(dataToSend);
       //发送数据
       this.handleProcess(this.pendingData);
     },
