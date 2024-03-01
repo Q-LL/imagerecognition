@@ -122,6 +122,7 @@
             var fileInput = document.getElementById("smpfileInput");
             var circle = document.getElementById("smpCircle").value;
             var file = fileInput.files[0];
+            var func = document.getElementById("function").value;
             const ws = new WebSocket("ws://127.0.0.1:8000/sample");
             ws.onopen = function (wsevent) {
                 console.log("Sample WebSocket connection established.");
@@ -131,7 +132,7 @@
                     var toSendData = {
                         "image": data,
                         "circle": circle,
-                        "func": autoFunStr,
+                        "func": func,
                         "slope": slope,
                         "intercept": intercept
                     };
