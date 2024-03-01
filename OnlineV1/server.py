@@ -69,9 +69,9 @@ async def process_image_standerd(websocket: WebSocket):
             else:
                 methord = 1
             # 线性拟合方法，非必须参数，缺省时为1
-            notAutoFunc = messageIn['notAutoFunc']
+            notAutoFunc = not messageIn['notAutoFunc']
             # 是否自动求解方程，非必须参数，缺省为True即不自动求解
-            if not notAutoFunc:
+            if str(notAutoFunc) == "":
                 notAutoFunc = True
             orImg = decode_base64_image(messageIn['image'])
             # 传入原始图像，必须参数
