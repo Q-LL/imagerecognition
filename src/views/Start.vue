@@ -287,9 +287,10 @@ export default {
           this.buttontype = 'warning';
 
           this.socket.onmessage = event => {
+            console.log(event);
             this.message = JSON.parse(event.data);
             this.message = this.message.result;
-            console.log(event);
+            
             this.resultt = "y=" + this.message[0].toExponential(3) + "x+" + this.message[1].toFixed(3) + "R2=" + this.message[2].toFixed(3);
           }
           this.socket.onclose = () => {
