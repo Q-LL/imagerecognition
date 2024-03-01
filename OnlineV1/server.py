@@ -234,7 +234,6 @@ async def process_image_sample(websocket: WebSocket):
             # 传入标曲斜率，同上，必须参数
             intercept = float(messageIn['intercept'])
             # 传入标曲截距，同上，必须参数
-            print(type(userFunc))
             # 读取样品图片
             circles = pd.read_csv(io.StringIO(
                 messageIn['circle']), header=None).values
