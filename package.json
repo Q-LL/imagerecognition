@@ -18,6 +18,7 @@
     "fs-extra": "^11.2.0",
     "opencv4js": "^3.4.3",
     "path-browserify": "^1.0.1",
+    "plotly.js-dist": "^2.29.1",
     "stream-browserify": "^3.0.0",
     "unplugin-auto-import": "^0.16.1",
     "unplugin-vue-components": "^0.25.2",

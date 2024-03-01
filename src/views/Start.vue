@@ -69,23 +69,29 @@
 
     <!-- 用户输入数据 -->
     <div class="input" v-if="steps == 2" style="text-align: center; padding-top: 20px; padding-bottom: 20px;">
-      <row>Function:<el-input class="custom-input" v-model="functions" placeholder="请输入 Function"></el-input></row>
-      &nbsp;&nbsp;&nbsp;不使用自动方程 <el-checkbox v-model="notAutoFunc"></el-checkbox>
-      <row v-if="!notAutoFunc">&nbsp;&nbsp;&nbsp;Goal:<el-input class="custom-input" v-model="Goal"
+      <row>Function:<el-input class="custom-input" :disabled="notAutoFunc" v-model="functions"
+          placeholder="请输入 Function"></el-input></row>
+      &nbsp;&nbsp;&nbsp;使用自动方程 <el-checkbox v-model="notAutoFunc"></el-checkbox>
+      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;Goal:<el-input class="custom-input" v-model="Goal"
           placeholder="请输入 Goal(选填)"></el-input></row>
-      <row v-if="!notAutoFunc">&nbsp;&nbsp;&nbsp;iteration:<el-input class="custom-input" v-model="iteration"
+      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;iteration:<el-input class="custom-input" v-model="iteration"
           placeholder="请输入 iteration(选填)"></el-input></row>
       <div>
-        <el-button @click="makedata()" :loading="loading"
-          :disabled="loading" :type="buttontype">{{ buttonText }}</el-button>
+        <el-button @click="makedata()" :loading="loading" :disabled="loading" :type="buttontype">{{ buttonText
+        }}</el-button>
       </div>
     </div>
 
     <!-- test show -->
     <div v-if="steps == 2">
-      {{ message }}
+      {{ chartresult }}
       <br>
-      {{ resultt }}
+      {{ chartpoints }}
+    </div>
+
+    <!-- 图表 -->
+    <div class="charts" v-if="steps == 3">
+      <div id="chartpoints" style="width:90%;height:25vh;"></div>
     </div>
 
     <!-- 步骤条 -->
@@ -99,6 +105,7 @@
 
 <script>
 import { connectWebSocket } from '@/axios';
+import Plotly from '../../node_modules/plotly.js-dist/plotly';
 
 export default {
   data() {
@@ -121,8 +128,8 @@ export default {
       circle: 5,//滑块半径
       functions: 'R/G',
       xValue: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
-      Goal: '',
-      iteration: '',
+      Goal: '0.95',
+      iteration: '20000',
       methord: false,
       notAutoFunc: false,
 
@@ -134,7 +141,9 @@ export default {
       statuss: '未连接',
 
       //结果数据
-      resultt: null,
+      chartresult: null,
+      chartpoints: null,
+      chartsdatapoint: [{x: [0, 1, 2],y: [6, 10, 2],error_y: {type: 'data',array: [1, 2, 3],visible: true},type: 'scatter'}],
 
       steps: 0,//步骤条
 
@@ -143,6 +152,10 @@ export default {
       loading: false,
       buttonText: '开始处理',
     }
+  },
+
+  mounted() {
+    Plotly.newPlot('chartpoints', chartsdatapoint);
   },
 
   methods: {
@@ -257,10 +270,11 @@ export default {
     makedata() {
       // 创建一个空对象
       const dataToSend = {};
-      if(this.notAutoFunc == true){
+      if (this.notAutoFunc == false) {
         this.Goal = '';
         this.iteration = '';
       }
+      else { this.functions = ''; }
       dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
       dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
       dataToSend.function = this.functions;
@@ -287,11 +301,25 @@ export default {
           this.buttontype = 'warning';
 
           this.socket.onmessage = event => {
-            console.log(event);
+            console.log(event.data);
             this.message = JSON.parse(event.data);
-            this.message = this.message.result;
-            
-            this.resultt = "y=" + this.message[0].toExponential(3) + "x+" + this.message[1].toFixed(3) + "R2=" + this.message[2].toFixed(3);
+
+            //不同函数的方法
+            if (this.notAutoFunc == false) {
+              this.chartpoints = this.message.points;
+              this.chartresult = this.message.result;
+            }
+            else {
+              if (this.message.status == "done") {
+                //console.log(this.message.Model);
+                this.functions = this.message.Model;
+              }
+              else if (this.message.status == "success") {
+                this.chartresult = this.message.result;
+                this.chartpoints = this.message.points;
+                //console.log(this.chartresult , this.chartpoints);
+              }
+            }
           }
           this.socket.onclose = () => {
             this.loading = false;
