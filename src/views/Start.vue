@@ -68,10 +68,10 @@
 
     <!-- 用户输入数据 -->
     <div class="input" v-if="steps == 2" style="text-align: center; padding-top: 20px; padding-bottom: 20px;">
-      notAutoFunc:<el-input class="custom-input" v-model="notAutoFunc" placeholder="请输入 notAutoFunc"></el-input>
-      Function:<el-input class="custom-input" v-model="functions" placeholder="请输入 Function"></el-input>
-      Goal:<el-input class="custom-input" v-model="Goal" placeholder="请输入 Goal"></el-input>
-      iteration:<el-input class="custom-input" v-model="iteration" placeholder="请输入 iteration"></el-input>
+      notAutoFunc <el-checkbox v-model="notAutoFunc"></el-checkbox>
+      <row v-if="!notAutoFunc">&nbsp;&nbsp;&nbsp;Function:<el-input class="custom-input"  v-model="functions" placeholder="请输入 Function"></el-input></row>
+      &nbsp;&nbsp;&nbsp;Goal:<el-input class="custom-input" v-model="Goal" placeholder="请输入 Goal(选填)"></el-input>
+      &nbsp;&nbsp;&nbsp;iteration:<el-input class="custom-input" v-model="iteration" placeholder="请输入 iteration(选填)"></el-input>
     </div>
 
     <!-- test show -->
