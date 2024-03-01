@@ -64,18 +64,24 @@ async def process_image_standerd(websocket: WebSocket):
             print("Data Recieved")
 
             messageIn = json.loads(data)
-            methord = 2 if messageIn['methord'] else 1
-            # 线性拟合方法
+            if messageIn['methord'] == True:
+                methord = 2
+            else:
+                methord = 1
+            # 线性拟合方法，非必须参数，缺省时为1
             notAutoFunc = not messageIn['notAutoFunc']
-            # 是否自动求解方程
+            # 是否自动求解方程，非必须参数，缺省为True即不自动求解
+            if not notAutoFunc:
+                notAutoFunc = True
             orImg = decode_base64_image(messageIn['image'])
-            # 传入原始图像
+            # 传入原始图像，必须参数
             circles = pd.read_csv(io.StringIO(
                 messageIn['circles']), header=None).values
-            # 传入圆坐标、半径[x,y,r]
+            # 传入圆坐标、半径[x,y,r]，必须参数
             xValueIn = pd.read_csv(io.StringIO(
                 messageIn['xValue']), header=None).values
-            # 传入横坐标即为浓度数值
+            # 传入横坐标即为浓度数值，必须参数
+            
             trainData = []
             # 存储用于训练的数据
             results = []
@@ -221,9 +227,13 @@ async def process_image_sample(websocket: WebSocket):
                 break
             messageIn = json.loads(data)
             smpImg = decode_base64_image(messageIn['image'])
+            # 传入样品图片，必须参数
             userFunc = create_function(messageIn['func'])
+            # 传入处理函数，由于fastapi服务端无法储存客户端两次的信息，该参数为必须参数
             slope = float(messageIn['slope'])
+            # 传入标曲斜率，同上，必须参数
             intercept = float(messageIn['intercept'])
+            # 传入标曲截距，同上，必须参数
             print(type(userFunc))
             # 读取样品图片
             circles = pd.read_csv(io.StringIO(
@@ -244,6 +254,7 @@ async def process_image_sample(websocket: WebSocket):
             result = [np.mean(results), np.std(results)]
             smpRes = [(result[0]-intercept)/slope, result[1]/slope]
             await websocket.send_text(json.dumps({"status": "done", "result": smpRes}))
+            # 传回处理结果，格式为{"status": "done", "result": [result,result_err]}
             await websocket.close()
         except Exception as e:
             break
