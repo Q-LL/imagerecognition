@@ -369,6 +369,7 @@ export default {
     delpoint(id) {
       const index = this.points.findIndex(point => point.id === id);
       this.points.splice(index, 1);
+      this.xValue.splice(index, 1);
       this.scaledPoints.splice(index, 1);
       this.pointsid = this.pointsid - 1;
       //console.log(this.pointsradios);
@@ -426,15 +427,10 @@ export default {
     makedata() {
       // 创建一个空对象
       const dataToSend = {};
-      // if (this.notAutoFunc == false) {
-      //   this.Goal = '';
-      //   this.iteration = '';
-      // }
-      // else { this.functions = ''; }
       dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
       dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
       dataToSend.function = this.functions;
-      //console.log(this.xValue.length,this.points.length)
+      console.log(this.xValue.length,this.points.length)
       if (this.xValue.length !== this.points.length) {
         ElNotification({
           title: 'Error',
