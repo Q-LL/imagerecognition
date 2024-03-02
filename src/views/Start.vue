@@ -467,6 +467,7 @@ export default {
           this.socket.onmessage = event => {
             //console.log(event.data);
             this.message = JSON.parse(event.data);
+            // console.log(this.message);
             //不同函数的方法
             if (this.notAutoFunc == false) {
               this.chartpoints = this.message.points;
@@ -476,6 +477,7 @@ export default {
             else {
               if (this.message.status == 'busy') {
                 this.autoFuncProgress = this.message.iteration / this.iteration;
+                // console.log(this.autoFuncProgress);
               }
               else if (this.message.status == 'done') {
                 this.autoFuncProgress == 1;
