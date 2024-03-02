@@ -261,6 +261,8 @@ async def process_image_sample(websocket: WebSocket):
                 results.append(rat)
             result = [np.mean(results), np.std(results)]
             smpRes = [(result[0]-intercept)/slope, result[1]/slope]
+            if is_nan(result[0]) or is_nan(result[1]):
+                smpRes = [0,0]
             await websocket.send_text(json.dumps({"status": "done", "result": smpRes}))
             # 传回处理结果，格式为{"status": "done", "result": [result,result_err]}
             await websocket.close()
