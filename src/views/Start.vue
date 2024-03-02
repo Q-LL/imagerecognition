@@ -46,7 +46,7 @@
 
     <!-- 展示图片 -->
     <div class="image-container" v-if="steps == 2">
-      <img :src="showimg(proofImage)" v-if="Visible" @click="handleImageClick($event)" />
+      <img ref="image" :src="showimg(proofImage)" v-if="Visible" @click="handleImageClick($event)" />
       <div v-for="(point, index) in scaledPoints" :key="index" class="point"
         :style="{ left: point.x - (point.cir * this.scale) + 'px', top: point.y - (point.cir * this.scale) + 'px', width: (2 * point.cir * this.scale) + 'px', height: (2 * point.cir * this.scale) + 'px' }">
       </div>
@@ -124,7 +124,7 @@
           :style="{ width: (2 * circle * this.scale2) + 'px', height: (2 * circle * this.scale2) + 'px' }"></div>
       </div>
       <div class="image-container">
-        <img :src="showimg(proofImage2)" v-if="Visible2" @click="handleImageClick2($event)" />
+        <img ref="image2" :src="proofImage2" v-if="Visible2" @click="handleImageClick2($event)" />
         <div v-for="(point, index) in scaledPoints2" :key="index" class="point"
           :style="{ left: point.x - (point.cir * this.scale2) + 'px', top: point.y - (point.cir * this.scale2) + 'px', width: (2 * point.cir * this.scale2) + 'px', height: (2 * point.cir * this.scale2) + 'px' }">
         </div>
@@ -188,7 +188,7 @@ export default {
       localx: null,
       localy: null,
 
-      scale: 1, // 图片缩放比例，默认为1，即不缩放
+      scale: null, // 图片缩放比例，默认为1，即不缩放
       scaledPoints: [], // 保存根据缩放比例调整后的标点位置
 
       //传出参数
@@ -197,7 +197,7 @@ export default {
       points: [], // 存储标点的坐标
       circle: 5,//滑块半径
       functions: 'R/G',
-      xValue: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+      xValue: [],
       Goal: '0.95',
       iteration: '20000',
       methord: false,
@@ -326,6 +326,13 @@ export default {
       return url;
     },
 
+    //自动触发一次图片点击以便于确认比例
+    autoclick() {
+      const img = this.$refs.image;
+      img.click();
+      this.delpoint(1);
+    },
+
     // 处理图片点击
     handleImageClick(event) {
       const imgWidth = event.target.width;
@@ -417,6 +424,15 @@ export default {
       dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
       dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
       dataToSend.function = this.functions;
+      //console.log(this.xValue.length,this.points.length)
+      if (this.xValue.length !== this.points.length) {
+        ElNotification({
+          title: 'Error',
+          message: '请确保每一个Xvalue都有值',
+          type: 'error',
+        });
+        return;
+      }
       dataToSend.xValue = this.xValue.join("\n");
       dataToSend.Goal = this.Goal;
       dataToSend.methord = this.methord;
@@ -424,7 +440,7 @@ export default {
       dataToSend.iteration = this.iteration;
       const jsonToSend = JSON.stringify(dataToSend);
       this.pendingData = jsonToSend;
-      console.log(this.notAutoFunc);
+      // console.log(this.notAutoFunc);
       console.log(dataToSend);
       //发送数据
       this.handleProcess(this.pendingData);
@@ -438,7 +454,6 @@ export default {
           this.loading = true;
           this.buttonText = '正在处理';
           this.buttontype = 'warning';
-
           this.socket.onmessage = event => {
             //console.log(event.data);
             this.message = JSON.parse(event.data);
@@ -541,8 +556,8 @@ export default {
         mode: 'lines',
         type: 'scatter',
         name: 'Fitting Line',
-      }],
-        console.log(this.chartsdatapoint);
+      }];
+      //console.log(this.chartsdatapoint);
     },
 
     //步骤
@@ -551,6 +566,11 @@ export default {
         this.loading = false,
         this.buttonText = '开始处理',
         this.steps = this.steps + 1;
+      if (this.steps == 2 && this.scale == null) {
+        this.$nextTick(() => {
+          this.autoclick();
+        });
+      }
     },
     laststep() {
       this.buttontype = 'primary',
