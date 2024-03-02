@@ -140,7 +140,7 @@
             <template #default="scope"><el-button size="small" type="danger"
                 @click="delpoint2(scope.row.id)">删除</el-button></template>
           </el-table-column>
-          <el-table-column label="结果" v-if="!(sampleresult == null)">{{ sampleresult[0] + '±' + sampleresult[1]
+          <el-table-column label="结果" v-if="!(sampleresult == null)">{{ sampleresult[0].toFixed(3) + '±' + sampleresult[1].toFixed(3)
             }}</el-table-column>
         </el-table>
       </div>
@@ -158,6 +158,10 @@
       <el-button @click="nextstep()" v-if="steps < 4" :disabled="!Visible || (steps == 2 && chartpoints == null)"
         type="primary">下一步</el-button>
     </div>
+  </div>
+  <!-- 错误提示 -->
+  <div v-if="errorMessage" class="error-message">
+    {{ errorMessage }}
   </div>
 </template>
 
@@ -232,6 +236,9 @@ export default {
       scale2: null,
       scaledPoints2: [],
       sampleresult: null,
+
+      //错误处理
+      errorMessage: null,
     }
   },
 
@@ -416,11 +423,11 @@ export default {
     makedata() {
       // 创建一个空对象
       const dataToSend = {};
-      if (this.notAutoFunc == false) {
-        this.Goal = '';
-        this.iteration = '';
-      }
-      else { this.functions = ''; }
+      // if (this.notAutoFunc == false) {
+      //   this.Goal = '';
+      //   this.iteration = '';
+      // }
+      // else { this.functions = ''; }
       dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
       dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
       dataToSend.function = this.functions;
@@ -580,6 +587,21 @@ export default {
     }
 
   },
+
+    // 错误捕获钩子
+    errorCaptured(err, vm, info) {
+    // 在这里处理捕获到的错误
+    console.error('错误信息:', err);
+    console.error('Vue 实例:', vm);
+    console.error('错误信息详情:', info);
+    
+    // 设置错误消息
+    this.errorMessage = '捕获到错误：' + err.message;
+    
+    // 返回 true 表示错误已经处理，不会向上传播
+    // 返回 false 或不返回任何值，错误会向上传播到全局错误处理器
+    return true;
+  },
 }
 </script>
 
@@ -638,4 +660,14 @@ img {
   height: 100%;
   object-fit: contain;
 }
+
+.error-message {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: red;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;}
 </style>

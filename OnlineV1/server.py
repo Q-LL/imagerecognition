@@ -10,6 +10,7 @@ import random
 import pandas as pd
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
+import math
 
 np.seterr(divide='ignore')
 # 将除0设置为error级
@@ -36,6 +37,8 @@ def linear(x, m, b):
     # 定义直线模型
     return m*x + b
 
+def is_nan(value):
+    return value != value
 
 app = FastAPI()
 
@@ -190,9 +193,15 @@ async def process_image_standerd(websocket: WebSocket):
             if methord == 1:
                 slope, intercept, r_value, p_value, std_err = linregress(
                     xValues, yValues)
+                if(is_nan(slope) or is_nan(intercept) or is_nan(r_value)):
+                    slope = 0
+                    intercept = 0
+                    r_value = 0
+                    drawPoints = []
+                    # 当输入参数错误导致直线拟合结果异常时将其重置为0
                 dataSend = {
                     'status': 'success',
-                    'result': [slope, intercept, float(r_value) * float(r_value), p_value, std_err],
+                    'result': [slope, intercept, float(r_value) * float(r_value)],
                     'points': drawPoints
                 }
                 dataSendJson = json.dumps(dataSend)
