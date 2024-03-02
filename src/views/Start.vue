@@ -59,10 +59,14 @@
         <el-table-column prop="x" label="x轴坐标" width="180" />
         <el-table-column prop="y" label="y轴坐标" width="180" />
         <el-table-column prop="cir" label="半径" width="180" />
-        <el-table-column label="操作"><template #default="scope"><el-button size="small" type="danger"
-              :disabled="isDeleteDisabled(scope.row.id)" @click="delpoint(scope.row.id)">删除</el-button></template>
+        <el-table-column label="操作">
+
+          <template #default="scope"><el-button size="small" type="danger" :disabled="isDeleteDisabled(scope.row.id)"
+              @click="delpoint(scope.row.id)">删除</el-button></template>
         </el-table-column>
-        <el-table-column label="xValue"><template #default="scope"><el-input v-model="xValue[scope.row.id - 1]"
+        <el-table-column label="xValue">
+
+          <template #default="scope"><el-input v-model="xValue[scope.row.id - 1]"
               placeholder="请输入xValue"></el-input></template>
         </el-table-column>
       </el-table>
@@ -79,8 +83,9 @@
       <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;请输入最大迭代次数:<el-input class="custom-input" v-model="iteration"
           placeholder="请输入 iteration(选填)"></el-input></row>
       <div>
-        <el-button @click="makedata()" :loading="loading" :disabled="loading" :type="buttontype">{{ buttonText
-        }}</el-button>
+        <el-button @click="makedata()" :loading="loading" :disabled="loading || pointsid == 0" :type="buttontype">{{
+        buttonText
+      }}</el-button>
       </div>
     </div>
 
@@ -95,16 +100,19 @@
     <div class="charts" style="width: 80%; height: 60vh; margin: auto; " v-if="steps == 3">
       <!-- <div id="chartpointsmap" style="width:90%;height:60vh;"></div> -->
       <chartpointsmap :ponints="chartsdatapoint" :linexy="chartresult" />
-      <p id="lineFunc" style="text-align: center;">直线方程: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >= 0 ? ' + ' : '' }}{{ Math.abs(chartresult[1]).toFixed(3) }} ,R² = {{ chartresult[2].toFixed(3) }}</p>
+      <p id="lineFunc" style="text-align: center;">直线方程: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >=
+        0 ?
+        ' + ' : '' }}{{ Math.abs(chartresult[1]).toFixed(3) }} ,R² = {{ chartresult[2].toFixed(3) }}</p>
     </div>
 
     <!-- 样品处理 -->
-    <div class="sample" v-if="steps == 4" style="height: 85vh;">
+    <div class="sample" v-if="steps == 4" style="height: 90vh;">
       <div class="upload" style="text-align: center;">
         <el-upload list-type="text" action='' accept=".jpg, .png" :limit="1" :auto-upload="false" :on-change="getFile2"
           :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove2">
           <el-button type="primary">选择图片上传</el-button>
           <br>
+
           <template #tip>
             <div slot="tip" class="el-upload__tip">只能上传一张jpg/png文件</div>
           </template>
@@ -127,16 +135,19 @@
           <el-table-column prop="x" label="x轴坐标" width="180" />
           <el-table-column prop="y" label="y轴坐标" width="180" />
           <el-table-column prop="cir" label="半径" width="180" />
-          <el-table-column label="操作"><template #default="scope"><el-button size="small" type="danger"
+          <el-table-column label="操作">
+
+            <template #default="scope"><el-button size="small" type="danger"
                 @click="delpoint2(scope.row.id)">删除</el-button></template>
           </el-table-column>
           <el-table-column label="结果" v-if="!(sampleresult == null)">{{ sampleresult[0] + '±' + sampleresult[1]
-          }}</el-table-column>
+            }}</el-table-column>
         </el-table>
       </div>
       <div style="text-align: center; padding-top: 15px;">
-        <el-button @click="makedata2()" :loading="loading" :disabled="loading || !Visible2" :type="buttontype">{{ buttonText
-        }}</el-button>
+        <el-button @click="makedata2()" :loading="loading" :disabled="loading || !Visible2 || pointsid2 == 0"
+          :type="buttontype">{{ buttonText
+          }}</el-button>
       </div>
     </div>
 
@@ -155,11 +166,11 @@ import { connectWebSocket, sampleWebSocket } from '@/axios';
 import chartpointsmap from '@/components/chartspoints.vue'
 
 function getNumber(theNumber) {
-    if (theNumber > 0) {
-        return "+" + theNumber.toFixed(3);
-    } else {
-        return theNumber.toString();
-    }
+  if (theNumber > 0) {
+    return "+" + theNumber.toFixed(3);
+  } else {
+    return theNumber.toString();
+  }
 }
 
 export default {
@@ -356,200 +367,200 @@ export default {
         this.scaledPoints2.splice(0, 1);
         this.pointsid2 = this.pointsid2 - 1;
       }
-        const imgWidth = event.target.width;
-        const imgHeight = event.target.height;
-        const img = event.target;
-        const displayWidth = img.getBoundingClientRect().width;// 获取图片的显示宽度
-        this.scale2 = displayWidth / this.localx2;
-        const x = Math.round((event.offsetX / imgWidth) * this.localx2);
-        const y = Math.round((event.offsetY / imgHeight) * this.localy2);
-        this.pointsid2 = this.pointsid2 + 1;
-        const id = this.pointsid2;
-        const cir = this.circle;
-        this.points2.push({ id, x, y, cir });
-        const scaledX = Math.round(x * this.scale2);
-        const scaledY = Math.round(y * this.scale2);
-        this.scaledPoints2.push({ id, x: scaledX, y: scaledY, cir })
-      },
-      //删除某一标点
-      delpoint2(id) {
-        const index = this.points2.findIndex(point => point.id === id);
-        this.points2.splice(index, 1);
-        this.scaledPoints2.splice(index, 1);
-        this.pointsid2 = this.pointsid2 - 1;
-      },
+      const imgWidth = event.target.width;
+      const imgHeight = event.target.height;
+      const img = event.target;
+      const displayWidth = img.getBoundingClientRect().width;// 获取图片的显示宽度
+      this.scale2 = displayWidth / this.localx2;
+      const x = Math.round((event.offsetX / imgWidth) * this.localx2);
+      const y = Math.round((event.offsetY / imgHeight) * this.localy2);
+      this.pointsid2 = this.pointsid2 + 1;
+      const id = this.pointsid2;
+      const cir = this.circle;
+      this.points2.push({ id, x, y, cir });
+      const scaledX = Math.round(x * this.scale2);
+      const scaledY = Math.round(y * this.scale2);
+      this.scaledPoints2.push({ id, x: scaledX, y: scaledY, cir })
+    },
+    //删除某一标点
+    delpoint2(id) {
+      const index = this.points2.findIndex(point => point.id === id);
+      this.points2.splice(index, 1);
+      this.scaledPoints2.splice(index, 1);
+      this.pointsid2 = this.pointsid2 - 1;
+    },
 
-      // 选择方法1，2
-      choosemethod(num) {
-        if (num == 1) {
-          this.methord = false;
-        }
-        else if (num == 2) {
-          this.methord = true;
-        }
-        else {
-          // 抛出错误弹窗
-        }
-        this.steps = this.steps + 1;
-        console.log(this.methord);
-      },
+    // 选择方法1，2
+    choosemethod(num) {
+      if (num == 1) {
+        this.methord = false;
+      }
+      else if (num == 2) {
+        this.methord = true;
+      }
+      else {
+        // 抛出错误弹窗
+      }
+      this.steps = this.steps + 1;
+      console.log(this.methord);
+    },
 
-      //处理发送数据
-      makedata() {
-        // 创建一个空对象
-        const dataToSend = {};
-        if (this.notAutoFunc == false) {
-          this.Goal = '';
-          this.iteration = '';
-        }
-        else { this.functions = ''; }
-        dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
-        dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
-        dataToSend.function = this.functions;
-        dataToSend.xValue = this.xValue.join("\n");
-        dataToSend.Goal = this.Goal;
-        dataToSend.methord = this.methord;
-        dataToSend.notAutoFunc = this.notAutoFunc;
-        dataToSend.iteration = this.iteration;
-        const jsonToSend = JSON.stringify(dataToSend);
-        this.pendingData = jsonToSend;
-        console.log(this.notAutoFunc);
-        console.log(dataToSend);
-        //发送数据
-        this.handleProcess(this.pendingData);
-      },
-      //按按钮发送数据
-      handleProcess(data) {
-        connectWebSocket(data)
-          .then(socket => {
-            this.socket = socket;
-            //按钮
-            this.loading = true;
-            this.buttonText = '正在处理';
-            this.buttontype = 'warning';
+    //处理发送数据
+    makedata() {
+      // 创建一个空对象
+      const dataToSend = {};
+      if (this.notAutoFunc == false) {
+        this.Goal = '';
+        this.iteration = '';
+      }
+      else { this.functions = ''; }
+      dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
+      dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
+      dataToSend.function = this.functions;
+      dataToSend.xValue = this.xValue.join("\n");
+      dataToSend.Goal = this.Goal;
+      dataToSend.methord = this.methord;
+      dataToSend.notAutoFunc = this.notAutoFunc;
+      dataToSend.iteration = this.iteration;
+      const jsonToSend = JSON.stringify(dataToSend);
+      this.pendingData = jsonToSend;
+      console.log(this.notAutoFunc);
+      console.log(dataToSend);
+      //发送数据
+      this.handleProcess(this.pendingData);
+    },
+    //按按钮发送数据
+    handleProcess(data) {
+      connectWebSocket(data)
+        .then(socket => {
+          this.socket = socket;
+          //按钮
+          this.loading = true;
+          this.buttonText = '正在处理';
+          this.buttontype = 'warning';
 
-            this.socket.onmessage = event => {
-              //console.log(event.data);
-              this.message = JSON.parse(event.data);
-              //不同函数的方法
-              if (this.notAutoFunc == false) {
-                this.chartpoints = this.message.points;
+          this.socket.onmessage = event => {
+            //console.log(event.data);
+            this.message = JSON.parse(event.data);
+            //不同函数的方法
+            if (this.notAutoFunc == false) {
+              this.chartpoints = this.message.points;
+              this.chartresult = this.message.result;
+              this.errorchartdata(this.chartpoints);
+            }
+            else {
+              if (this.message.status == "done") {
+                //console.log(this.message.Model);
+                this.functions = this.message.Model;
+              }
+              else if (this.message.status == "success") {
                 this.chartresult = this.message.result;
+                this.chartpoints = this.message.points;
                 this.errorchartdata(this.chartpoints);
               }
-              else {
-                if (this.message.status == "done") {
-                  //console.log(this.message.Model);
-                  this.functions = this.message.Model;
-                }
-                else if (this.message.status == "success") {
-                  this.chartresult = this.message.result;
-                  this.chartpoints = this.message.points;
-                  this.errorchartdata(this.chartpoints);
-                }
-              }
-              //console.log(this.chartsdatapoint);
-              //console.log(this.chartresult , this.chartpoints);
             }
-            this.socket.onclose = () => {
-              this.loading = false;
-              this.buttontype = 'success';
-              this.buttonText = '处理完成';
-            }
-          })
-          .catch(error => {
-            // 处理错误，这里只是简单地显示在页面上
-            this.statuss = error.message;
-          })
-      },
-
-      //选取样点
-      makedata2() {
-        const dataToSend = {};
-        dataToSend.image = this.proofImage2[0] + ',' + this.proofImage2[1];
-        let point = this.points2[0];
-        let x = point.x; let y = point.y; let r = point.cir;
-        console.log(x, y, r);
-        dataToSend.circle = x + ',' + y + ',' + r;
-        dataToSend.func = this.functions;
-        dataToSend.intercept = this.chartresult[1];
-        dataToSend.slope = this.chartresult[0];
-        const jsonToSend = JSON.stringify(dataToSend);
-        console.log(dataToSend);
-        this.pointProcess(jsonToSend);
-      },
-      pointProcess(data) {
-        sampleWebSocket(data)
-          .then(socket => {
-            this.socket = socket;
-            this.loading = true;
-            this.buttonText = '正在处理';
-            this.buttontype = 'warning';
-            this.socket.onmessage = event => {
-              console.log(event.data);
-              let message = JSON.parse(event.data);
-              this.sampleresult = message.result;
-            }
-            this.socket.onclose = () => {
-              this.loading = false;
-              this.buttontype = 'success';
-              this.buttonText = '处理完成';
-            }
-          })
-          .catch(error => {
-            this.sampleresult = error.message;
-          })
-      },
-
-      //处理图表数据
-      errorchartdata(data) {
-        let x = [];
-        let y = [];
-        let error_y = [];
-        for (let i = 0; i < data.length; i++) {
-          x.push(data[i][0]);
-          y.push(data[i][1]);
-          error_y.push(data[i][2]);
-        }
-        //存入
-        this.chartsdatapoint = [{
-          x: x,
-          y: y,
-          error_y: {
-            type: 'data',
-            array: error_y,
-            visible: true,
-          },
-          mode: 'markers',
-          type: 'scatter',
-          name: 'Data Points',
-        },
-        {
-          x: [(x.at(0)-0.1*(x.at(-1)-x.at(0))),(x.at(-1)+0.1*(x.at(-1)-x.at(0)))],
-          y: [(this.chartresult[0]*(x.at(0)-0.1*(x.at(-1)-x.at(0)))+this.chartresult[1]),(this.chartresult[0]*(x.at(-1)+0.1*(x.at(-1)-x.at(0)))+this.chartresult[1])],
-          mode: 'lines',
-          type: 'scatter',
-          name: 'Fitting Line',
-        }],
-          console.log(this.chartsdatapoint);
-      },
-
-      //步骤
-      nextstep() {
-        this.buttontype = 'primary',
-          this.loading = false,
-          this.buttonText = '开始处理',
-          this.steps = this.steps + 1;
-      },
-      laststep() {
-        this.buttontype = 'primary',
-          this.loading = false,
-          this.buttonText = '开始处理',
-          this.steps = this.steps - 1;
-      }
-
+            //console.log(this.chartsdatapoint);
+            //console.log(this.chartresult , this.chartpoints);
+          }
+          this.socket.onclose = () => {
+            this.loading = false;
+            this.buttontype = 'success';
+            this.buttonText = '处理完成';
+          }
+        })
+        .catch(error => {
+          // 处理错误，这里只是简单地显示在页面上
+          this.statuss = error.message;
+        })
     },
-  }
+
+    //选取样点
+    makedata2() {
+      const dataToSend = {};
+      dataToSend.image = this.proofImage2[0] + ',' + this.proofImage2[1];
+      let point = this.points2[0];
+      let x = point.x; let y = point.y; let r = point.cir;
+      console.log(x, y, r);
+      dataToSend.circle = x + ',' + y + ',' + r;
+      dataToSend.func = this.functions;
+      dataToSend.intercept = this.chartresult[1];
+      dataToSend.slope = this.chartresult[0];
+      const jsonToSend = JSON.stringify(dataToSend);
+      console.log(dataToSend);
+      this.pointProcess(jsonToSend);
+    },
+    pointProcess(data) {
+      sampleWebSocket(data)
+        .then(socket => {
+          this.socket = socket;
+          this.loading = true;
+          this.buttonText = '正在处理';
+          this.buttontype = 'warning';
+          this.socket.onmessage = event => {
+            console.log(event.data);
+            let message = JSON.parse(event.data);
+            this.sampleresult = message.result;
+          }
+          this.socket.onclose = () => {
+            this.loading = false;
+            this.buttontype = 'success';
+            this.buttonText = '处理完成';
+          }
+        })
+        .catch(error => {
+          this.sampleresult = error.message;
+        })
+    },
+
+    //处理图表数据
+    errorchartdata(data) {
+      let x = [];
+      let y = [];
+      let error_y = [];
+      for (let i = 0; i < data.length; i++) {
+        x.push(data[i][0]);
+        y.push(data[i][1]);
+        error_y.push(data[i][2]);
+      }
+      //存入
+      this.chartsdatapoint = [{
+        x: x,
+        y: y,
+        error_y: {
+          type: 'data',
+          array: error_y,
+          visible: true,
+        },
+        mode: 'markers',
+        type: 'scatter',
+        name: 'Data Points',
+      },
+      {
+        x: [(x.at(0) - 0.1 * (x.at(-1) - x.at(0))), (x.at(-1) + 0.1 * (x.at(-1) - x.at(0)))],
+        y: [(this.chartresult[0] * (x.at(0) - 0.1 * (x.at(-1) - x.at(0))) + this.chartresult[1]), (this.chartresult[0] * (x.at(-1) + 0.1 * (x.at(-1) - x.at(0))) + this.chartresult[1])],
+        mode: 'lines',
+        type: 'scatter',
+        name: 'Fitting Line',
+      }],
+        console.log(this.chartsdatapoint);
+    },
+
+    //步骤
+    nextstep() {
+      this.buttontype = 'primary',
+        this.loading = false,
+        this.buttonText = '开始处理',
+        this.steps = this.steps + 1;
+    },
+    laststep() {
+      this.buttontype = 'primary',
+        this.loading = false,
+        this.buttonText = '开始处理',
+        this.steps = this.steps - 1;
+    }
+
+  },
+}
 </script>
 
 <style scoped>
