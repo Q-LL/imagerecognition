@@ -92,9 +92,10 @@
     </div> -->
 
     <!-- 图表  -->
-    <div class="charts" style="width: 80%; height: 90vh; margin: auto; " v-if="steps == 3">
+    <div class="charts" style="width: 80%; height: 60vh; margin: auto; " v-if="steps == 3">
       <!-- <div id="chartpointsmap" style="width:90%;height:60vh;"></div> -->
       <chartpointsmap :ponints="chartsdatapoint" :linexy="chartresult" />
+      <p id="lineFunc" style="text-align: center;">直线方程: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >= 0 ? ' + ' : '' }}{{ Math.abs(chartresult[1]).toFixed(3) }} ,R² = {{ chartresult[2].toFixed(3) }}</p>
     </div>
 
     <!-- 样品处理 -->
@@ -152,6 +153,14 @@
 <script>
 import { connectWebSocket, sampleWebSocket } from '@/axios';
 import chartpointsmap from '@/components/chartspoints.vue'
+
+function getNumber(theNumber) {
+    if (theNumber > 0) {
+        return "+" + theNumber.toFixed(3);
+    } else {
+        return theNumber.toString();
+    }
+}
 
 export default {
   components: {
