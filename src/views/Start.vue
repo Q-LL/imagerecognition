@@ -77,15 +77,17 @@
       <row style="padding-left: 10px; padding-bottom: 10px;">&nbsp;&nbsp;&nbsp;使用自动方程 <el-checkbox
           v-model="notAutoFunc"></el-checkbox></row>
       <row>&nbsp;&nbsp;&nbsp;Function:<el-input class="custom-input" :disabled="notAutoFunc" v-model="functions"
-          placeholder="请输入 Function"></el-input></row>
+          placeholder="请输入 Function" style="width: 500px;"></el-input></row><br>
       <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;请输入计算目标R^2:<el-input class="custom-input" v-model="Goal"
           placeholder="请输入 Goal(选填)"></el-input></row>
       <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;请输入最大迭代次数:<el-input class="custom-input" v-model="iteration"
-          placeholder="请输入 iteration(选填)"></el-input></row>
+          placeholder="请输入 iteration(选填)"></el-input></row><br>
+      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;<p>当前进度:{{ autoFuncProgress }}</p>
+      </row>
       <div>
         <el-button @click="makedata()" :loading="loading" :disabled="loading || pointsid == 0" :type="buttontype">{{
-        buttonText
-      }}</el-button>
+          buttonText
+        }}</el-button>
       </div>
     </div>
 
@@ -140,8 +142,9 @@
             <template #default="scope"><el-button size="small" type="danger"
                 @click="delpoint2(scope.row.id)">删除</el-button></template>
           </el-table-column>
-          <el-table-column label="结果" v-if="!(sampleresult == null)">{{ sampleresult[0].toFixed(3) + '±' + sampleresult[1].toFixed(3)
-            }}</el-table-column>
+          <el-table-column label="结果" v-if="!(sampleresult == null)">{{ sampleresult[0].toFixed(3) + '±' +
+            sampleresult[1].toFixed(3)
+          }}</el-table-column>
         </el-table>
       </div>
       <div style="text-align: center; padding-top: 15px;">
@@ -218,7 +221,7 @@ export default {
       chartresult: null,
       chartpoints: null,
       chartsdatapoint: null,
-
+      autoFuncProgress: null,
       steps: 0,//步骤条
 
       //处理按钮
@@ -471,9 +474,16 @@ export default {
               this.errorchartdata(this.chartpoints);
             }
             else {
+              if (this.message.status == 'busy') {
+                this.autoFuncProgress = this.message.iteration / this.iteration;
+              }
+              else if (this.message.status == 'done') {
+                this.autoFuncProgress == 1;
+                this.functions = this.message.Model;
+              }
               if (this.message.status == "done") {
                 //console.log(this.message.Model);
-                this.functions = this.message.Model;
+
               }
               else if (this.message.status == "success") {
                 this.chartresult = this.message.result;
@@ -588,16 +598,16 @@ export default {
 
   },
 
-    // 错误捕获钩子
-    errorCaptured(err, vm, info) {
+  // 错误捕获钩子
+  errorCaptured(err, vm, info) {
     // 在这里处理捕获到的错误
     console.error('错误信息:', err);
     console.error('Vue 实例:', vm);
     console.error('错误信息详情:', info);
-    
+
     // 设置错误消息
     this.errorMessage = '捕获到错误：' + err.message;
-    
+
     // 返回 true 表示错误已经处理，不会向上传播
     // 返回 false 或不返回任何值，错误会向上传播到全局错误处理器
     return true;
@@ -669,5 +679,6 @@ img {
   background-color: red;
   color: white;
   padding: 10px;
-  border-radius: 5px;}
+  border-radius: 5px;
+}
 </style>
