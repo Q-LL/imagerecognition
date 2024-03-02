@@ -511,7 +511,16 @@ export default {
             array: error_y,
             visible: true,
           },
+          mode: 'markers',
           type: 'scatter',
+          name: 'Data Points',
+        },
+        {
+          x: [(x.at(0)-0.1*(x.at(-1)-x.at(0))),(x.at(-1)+0.1*(x.at(-1)-x.at(0)))],
+          y: [(this.chartresult[0]*(x.at(0)-0.1*(x.at(-1)-x.at(0)))+this.chartresult[1]),(this.chartresult[0]*(x.at(-1)+0.1*(x.at(-1)-x.at(0)))+this.chartresult[1])],
+          mode: 'lines',
+          type: 'scatter',
+          name: 'Fitting Line',
         }],
           console.log(this.chartsdatapoint);
       },
