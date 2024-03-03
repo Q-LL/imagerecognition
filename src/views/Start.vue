@@ -82,21 +82,16 @@
           placeholder="请输入 Goal(选填)"></el-input></row>
       <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;请输入最大迭代次数:<el-input class="custom-input" v-model="iteration"
           placeholder="请输入 iteration(选填)"></el-input></row><br>
-      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;<p>当前进度:{{ autoFuncProgress }}</p>
-      </row>
+      <!-- <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;<p>当前进度:{{ autoFuncProgress }}</p></row> -->
+      <div v-if="notAutoFunc" style="width: 80%; margin: auto; padding-bottom: 10px;">
+        <el-progress :percentage="Math.round(autoFuncProgress*100)" />
+      </div>
       <div>
         <el-button @click="makedata()" :loading="loading" :disabled="loading || pointsid == 0" :type="buttontype">{{
           buttonText
         }}</el-button>
       </div>
     </div>
-
-    <!-- test show -->
-    <!-- <div v-if="steps == 2">
-      {{ chartresult }}
-      <br>
-      {{ chartpoints }}
-    </div> -->
 
     <!-- 图表  -->
     <div class="charts" style="width: 80%; height: 60vh; margin: auto; " v-if="steps == 3">
@@ -473,7 +468,7 @@ export default {
             else {
               if (this.message.status == 'busy') {
                 this.autoFuncProgress = this.message.iteration / this.iteration;
-                // console.log(this.autoFuncProgress);
+                console.log(this.autoFuncProgress);
               }
               else if (this.message.status == 'done') {
                 this.autoFuncProgress == 1;
