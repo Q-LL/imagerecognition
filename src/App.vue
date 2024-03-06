@@ -94,7 +94,7 @@
     </div>
 
     <!-- 图表  -->
-    <div class="charts" style="width: 80%; height:60vh; margin: auto; " v-if="steps == 3">
+    <div class="charts" style="width: 80%; height:100vh; margin: auto; " v-if="steps == 3">
       <!-- <div id="chartpointsmap" style="width:90%;height:60vh;"></div> -->
       <chartpointsmap :ponints="chartsdatapoint" :linexy="chartresult" />
       <p id="lineFunc" style="text-align: center;">直线方程: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >=
