@@ -99,7 +99,11 @@
       <chartpointsmap :ponints="chartsdatapoint" :linexy="chartresult" />
       <p id="lineFunc" style="text-align: center;">直线方程: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >=
         0 ?
-        ' + ' : '' }}{{ Math.abs(chartresult[1]).toFixed(3) }} ,R² = {{ chartresult[2].toFixed(3) }}</p>
+        ' + ' : '' }}{{ Math.abs(chartresult[1]).toFixed(3) }} ,R² = {{ chartresult[2].toFixed(3) }}</p><br>
+
+        <div style="text-align: center;">
+          <el-button type="primary" @click="dataDownload()">下载数据</el-button>
+        </div>
     </div>
 
     <!-- 样品处理 -->
@@ -174,7 +178,6 @@ function getNumber(theNumber) {
     return theNumber.toString();
   }
 }
-
 export default {
   components: {
     chartpointsmap,
@@ -235,6 +238,8 @@ export default {
       scaledPoints2: [],
       sampleresult: null,
 
+      //下载数据
+      downloaData:[],
       //错误处理
       errorMessage: null,
     }
@@ -572,6 +577,28 @@ export default {
       //console.log(this.chartsdatapoint);
     },
 
+    //数据下载
+    dataDownload(){
+      let dataToDownload = '';
+      let functionText = ('slope='+this.chartresult[0]+',intercept='+this.chartresult[1]+',r^2='+this.chartresult[2]);
+      dataToDownload += functionText;
+      dataToDownload += '\n';
+      dataToDownload += 'x,y,error_y\n';
+      for (let i = 0; i < this.message.points.length; i++) { // 遍历数据
+        dataToDownload += this.message.points[i];
+        dataToDownload += '\n';
+      }
+      // console.log(dataToDownload);
+      const blob = new Blob([dataToDownload], { type: 'text/csv;charset=utf-8' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'data.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
     //步骤
     nextstep() {
       this.buttontype = 'primary',
