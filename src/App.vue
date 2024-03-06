@@ -50,6 +50,9 @@ window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
     super(callback);
   }
 }
+
+import { useI18n } from 'vue-i18n';
+const { locale } = useI18n()
 </script>
 
 <style>
