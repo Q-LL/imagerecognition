@@ -10,6 +10,7 @@ import random
 import pandas as pd
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
+import tensorflow as tf
 
 
 np.seterr(divide='ignore')
@@ -58,7 +59,7 @@ linearResult = None
 
 
 async def process_image_standerd(websocket: WebSocket):
-    try:
+    # try:
         data = await websocket.receive_text()
         # 从前端接收数据
         if not data:
@@ -125,44 +126,27 @@ async def process_image_standerd(websocket: WebSocket):
             concentration_values = trainDataDf['x'].values
 
             # 初始化参数和优化器
-            parameters = np.random.rand(6)
-            optimizer = {'beta1': 0.9, 'beta2': 0.999, 'epsilon': 1e-8}
-            m = np.zeros(6)
-            v = np.zeros(6)
+            parameters = tf.Variable(tf.random.uniform((6,), dtype=tf.float32))
+            optimizer = tf.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-8)
 
             # 模型训练
             for iteration in range(iterations):
-                model_output = np.dot(
-                    RGB_values, parameters[:3]) / np.dot(RGB_values, parameters[3:])
-                combined_data = np.column_stack(
-                    (concentration_values, model_output))
-                linear_reg_model = LinearRegression()
-                linear_reg_model.fit(
-                    combined_data[:, 0].reshape(-1, 1), combined_data[:, 1])
-                r_squared = r2_score(combined_data[:, 1], linear_reg_model.predict(
-                    combined_data[:, 0].reshape(-1, 1)))
-                gradient = np.zeros(6)
-                for i in range(3):
-                    gradient[i] = np.sum(2 * (model_output - concentration_values)
-                                            * RGB_values[:, i] / np.dot(RGB_values, parameters[3:]))
-                for i in range(3, 6):
-                    gradient[i] = np.sum(-2 * (model_output - concentration_values) *
-                                            model_output * RGB_values[:, i-3] / np.dot(RGB_values, parameters[3:])**2)
-                m = optimizer['beta1'] * m + \
-                    (1 - optimizer['beta1']) * gradient
-                v = optimizer['beta2'] * v + \
-                    (1 - optimizer['beta2']) * (gradient ** 2)
-                m_hat = m / (1 - optimizer['beta1'] ** (iteration + 1))
-                v_hat = v / (1 - optimizer['beta2'] ** (iteration + 1))
-                parameters -= m_hat / \
-                    (np.sqrt(v_hat) + optimizer['epsilon'])
+                with tf.GradientTape() as tape:
+                    model_output = tf.linalg.matmul(RGB_values, parameters[:3]) / tf.linalg.matmul(RGB_values, parameters[3:])
+                    combined_data = tf.concat([tf.expand_dims(concentration_values, 1), tf.expand_dims(model_output, 1)], axis=1)
+                    linear_reg_model = LinearRegression().fit(combined_data[:, 0].numpy().reshape(-1, 1), combined_data[:, 1].numpy())
+                    r_squared = r2_score(combined_data[:, 1].numpy(), linear_reg_model.predict(combined_data[:, 0].numpy().reshape(-1, 1)))
+                    loss = tf.reduce_sum((model_output - concentration_values) ** 2)
+                
+                gradients = tape.gradient(loss, [parameters])
+                optimizer.apply_gradients(zip(gradients, [parameters]))
+
                 if (iteration % 100) == 9:
-                    sendStatus = json.dumps(
-                        {"status": "busy", "iteration": iteration + 1, "R2": r_squared})
-                    
+                    sendStatus = json.dumps({"status": "busy", "iteration": iteration + 1, "R2": r_squared})
                     await websocket.send_text(sendStatus)
                     print(sendStatus)
-                if r_squared > goalR2: 
+
+                if r_squared > goalR2:
                     break
             # 发送最终结果
             final_output = {"status": "done", "R2": r_squared,
@@ -224,8 +208,8 @@ async def process_image_standerd(websocket: WebSocket):
             dataSendJson = json.dumps(dataSend)
             await websocket.send_text(dataSendJson)
             await websocket.close()
-    except Exception as e:
-        await websocket.close()
+    # except Exception as e:
+    #     await websocket.close()
 
 
 async def process_image_sample(websocket: WebSocket):

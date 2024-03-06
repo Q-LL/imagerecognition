@@ -82,8 +82,8 @@
           placeholder="请输入 Goal(选填)"></el-input></row>
       <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;请输入最大迭代次数:<el-input class="custom-input" v-model="iteration"
           placeholder="请输入 iteration(选填)"></el-input></row><br>
-      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;<p>当前进度:{{ autoFuncProgress }}</p>
-      </row>
+      <!-- <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;<p>当前进度:{{ autoFuncProgress }}</p> -->
+      <!-- </row> -->
       <div>
         <el-button @click="makedata()" :loading="loading" :disabled="loading || pointsid == 0" :type="buttontype">{{
           buttonText
@@ -99,7 +99,7 @@
     </div> -->
 
     <!-- 图表  -->
-    <div class="charts" style="width: 80%; height: 60vh; margin: auto; " v-if="steps == 3">
+    <div class="charts" style="width: 80%; height:60vh; margin: auto; " v-if="steps == 3">
       <!-- <div id="chartpointsmap" style="width:90%;height:60vh;"></div> -->
       <chartpointsmap :ponints="chartsdatapoint" :linexy="chartresult" />
       <p id="lineFunc" style="text-align: center;">直线方程: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >=
@@ -564,6 +564,7 @@ export default {
         mode: 'markers',
         type: 'scatter',
         name: 'Data Points',
+        line: {color : '#002f49'}
       },
       {
         x: [(x.at(0) - 0.1 * (x.at(-1) - x.at(0))), (x.at(-1) + 0.1 * (x.at(-1) - x.at(0)))],
@@ -571,6 +572,7 @@ export default {
         mode: 'lines',
         type: 'scatter',
         name: 'Fitting Line',
+        line: {color : '#669bbb'}
       }];
       //console.log(this.chartsdatapoint);
     },

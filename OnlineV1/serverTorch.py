@@ -10,7 +10,10 @@ import random
 import pandas as pd
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
-
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
 
 np.seterr(divide='ignore')
 # 将除0设置为error级
@@ -58,7 +61,7 @@ linearResult = None
 
 
 async def process_image_standerd(websocket: WebSocket):
-    try:
+    # try:
         data = await websocket.receive_text()
         # 从前端接收数据
         if not data:
@@ -119,51 +122,33 @@ async def process_image_standerd(websocket: WebSocket):
             # 解算目标R2
             iterations = int(messageIn['iteration'])
             # 目标迭代次数
-            trainDataDf = pd.DataFrame(
-                trainData, columns=['R', 'G', 'B', 'x'])
-            RGB_values = trainDataDf[['R', 'G', 'B']].values
-            concentration_values = trainDataDf['x'].values
-
+            # 转换训练数据
+            trainDataDf = pd.DataFrame(trainData, columns=['R', 'G', 'B', 'x'])
+            RGB_values = torch.tensor(trainDataDf[['R', 'G', 'B']].values, dtype=torch.float32)
+            concentration_values = torch.tensor(trainDataDf['x'].values, dtype=torch.float32)
             # 初始化参数和优化器
-            parameters = np.random.rand(6)
-            optimizer = {'beta1': 0.9, 'beta2': 0.999, 'epsilon': 1e-8}
-            m = np.zeros(6)
-            v = np.zeros(6)
+            parameters = torch.rand(6, requires_grad=True, dtype=torch.float32)
+            optimizer = torch.optim.Adam([parameters], betas=(0.9, 0.999), eps=1e-8)
 
-            # 模型训练
             for iteration in range(iterations):
-                model_output = np.dot(
-                    RGB_values, parameters[:3]) / np.dot(RGB_values, parameters[3:])
-                combined_data = np.column_stack(
-                    (concentration_values, model_output))
+                model_output = torch.matmul(RGB_values, parameters[:3]) / torch.matmul(RGB_values, parameters[3:])
+                combined_data = torch.cat((concentration_values.view(-1, 1), model_output.view(-1, 1)), dim=1)
                 linear_reg_model = LinearRegression()
-                linear_reg_model.fit(
-                    combined_data[:, 0].reshape(-1, 1), combined_data[:, 1])
-                r_squared = r2_score(combined_data[:, 1], linear_reg_model.predict(
-                    combined_data[:, 0].reshape(-1, 1)))
-                gradient = np.zeros(6)
-                for i in range(3):
-                    gradient[i] = np.sum(2 * (model_output - concentration_values)
-                                            * RGB_values[:, i] / np.dot(RGB_values, parameters[3:]))
-                for i in range(3, 6):
-                    gradient[i] = np.sum(-2 * (model_output - concentration_values) *
-                                            model_output * RGB_values[:, i-3] / np.dot(RGB_values, parameters[3:])**2)
-                m = optimizer['beta1'] * m + \
-                    (1 - optimizer['beta1']) * gradient
-                v = optimizer['beta2'] * v + \
-                    (1 - optimizer['beta2']) * (gradient ** 2)
-                m_hat = m / (1 - optimizer['beta1'] ** (iteration + 1))
-                v_hat = v / (1 - optimizer['beta2'] ** (iteration + 1))
-                parameters -= m_hat / \
-                    (np.sqrt(v_hat) + optimizer['epsilon'])
+                linear_reg_model.fit(combined_data[:, 0].reshape(-1, 1).detach().numpy(), combined_data[:, 1].reshape(-1, 1).detach().numpy())
+                r_squared = r2_score(combined_data[:, 1].detach().numpy(), linear_reg_model.predict(combined_data[:, 0].reshape(-1, 1).detach().numpy()))
+                
+                loss = F.mse_loss(model_output, concentration_values)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
                 if (iteration % 100) == 9:
-                    sendStatus = json.dumps(
-                        {"status": "busy", "iteration": iteration + 1, "R2": r_squared})
-                    
+                    sendStatus = json.dumps({"status": "busy", "iteration": iteration + 1, "R2": r_squared})
                     await websocket.send_text(sendStatus)
                     print(sendStatus)
-                if r_squared > goalR2: 
+                if r_squared > goalR2:
                     break
+
             # 发送最终结果
             final_output = {"status": "done", "R2": r_squared,
                             "Model": f"({parameters[0]}*R + {parameters[1]}*G + {parameters[2]}*B) / ({parameters[3]}*R + {parameters[4]}*G + {parameters[5]}*B)"}
@@ -224,8 +209,8 @@ async def process_image_standerd(websocket: WebSocket):
             dataSendJson = json.dumps(dataSend)
             await websocket.send_text(dataSendJson)
             await websocket.close()
-    except Exception as e:
-        await websocket.close()
+    # except Exception as e:
+    #     await websocket.close()
 
 
 async def process_image_sample(websocket: WebSocket):

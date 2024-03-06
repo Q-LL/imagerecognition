@@ -1,10 +1,14 @@
 <template>
   <div>
-    <div id="charts"></div>
+    <div id="charts" class="charts"></div>
   </div>
 </template>
 
 <script>
+var layout = {
+  width: 800, // 画布宽度
+  height: 600, 
+};
 import Plotly from 'plotly.js-dist'
 export default {
   props: {
@@ -21,7 +25,7 @@ export default {
     //   },
     //   type: 'scatter',
     // };
-    Plotly.newPlot('charts', this.ponints, {}, { modeBarButtonsToRemove: ['select2d', 'lasso2d'], displaylogo: false });
+    Plotly.newPlot('charts', this.ponints, layout, { modeBarButtonsToRemove: ['select2d', 'lasso2d'], displaylogo: false });
   },
 
   watch: {
@@ -33,4 +37,10 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+  .charts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  </style>
