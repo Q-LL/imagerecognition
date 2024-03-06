@@ -703,4 +703,7 @@ img {
   padding: 10px;
   border-radius: 5px;
 }
+body {
+  overflow-y: scroll; /* 显示垂直滚动条 */
+}
 </style>

@@ -31,7 +31,7 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-vuex": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
+    "@vue/cli-service": "^5.0.8",
     "sass": "^1.71.0",
     "sass-loader": "^14.1.1",
     "webpack": "^5.90.3"
