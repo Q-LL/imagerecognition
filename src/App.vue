@@ -1,8 +1,8 @@
 <template>
   <div class="header">
     <el-row style="margin: auto; width: 180px;">
-      <router-link to="/">主页</router-link> |
-      <router-link to="/start">开始使用</router-link> |
+      <router-link to="/">开始使用</router-link>
+      &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
       <router-link to="/about">关于项目</router-link>
     </el-row>
     <el-row style="margin-left: 90%; padding: 0;">
@@ -52,7 +52,13 @@ window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
 }
 
 import { useI18n } from 'vue-i18n';
-const { locale } = useI18n()
+
+export default {
+  setup() {
+    const { locale } = useI18n();
+  }
+}
+
 </script>
 
 <style>
