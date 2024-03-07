@@ -1,13 +1,13 @@
 <template>
   <div style="display: flex; justify-content: center; padding-bottom: 20px; padding-top: 20px;">
-    <h1>开始使用</h1>
+    <h1>{{ $t('start.start') }}</h1>
   </div>
   <div style="padding-bottom: 30px;">
     <!-- 步骤 -->
     <div class="step">
       <el-steps :active="steps" finish-status="success" align-center>
-        <el-step title="上传图片" />
-        <el-step title="选择处理方法" />
+        <el-step :title="$t('start.upload')" />
+        <el-step :title="$t('start.choosemethod')" />
         <el-step title="标注图片及处理" />
         <el-step title="展示数据" />
         <el-step title="样品处理" />

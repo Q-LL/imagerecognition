@@ -1,34 +1,34 @@
 <template>
   <div class="header">
-    <el-row style="margin: auto; width: 180px;">
-      <router-link to="/">开始使用</router-link>
-      &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-      <router-link to="/about">关于项目</router-link>
-    </el-row>
-    <el-row style="margin-left: 90%; padding: 0;">
+    <div class="tabs">
+      <el-tabs v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane :label="$t('app.start')" name="first">
+          <router-view />
+        </el-tab-pane>
+        <el-tab-pane :label="$t('app.about')" name="second">
+          <router-view />
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+    <div class="dropdown">
       <el-dropdown>
         <el-button type="primary">
-          选择语言<el-icon class="el-icon--right">
+          {{ $t('app.language') }}<el-icon class="el-icon--right">
             <ArrowDownBold />
           </el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>中文</el-dropdown-item>
-            <el-dropdown-item>English</el-dropdown-item>
+            <el-dropdown-item @click="changeLanguage('zh-cn')">中文</el-dropdown-item>
+            <el-dropdown-item @click="changeLanguage('en-us')">English</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-    </el-row>
-
-  </div>
-  <div>
-    <router-view />
-  </div>
-  <div class="footer">
-
+      <el-link icon="" href="https://github.com/your-project" target="_blank"></el-link>
+    </div>
   </div>
 </template>
+
 
 <script>
 //修复element-UI引起的ResizeObserver报错
@@ -42,22 +42,51 @@ const debounce = (fn, delay) => {
       fn.apply(context, args);
     }, delay);
   }
-}
+};
 const _ResizeObserver = window.ResizeObserver;
 window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
   constructor(callback) {
     callback = debounce(callback, 16);
     super(callback);
   }
-}
+};
 
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n';
+import router from './router'
 
 export default {
   setup() {
     const { locale } = useI18n();
+    const activeName = ref('first');
+
+    //切换语言
+    const changeLanguage = (lang) => {
+      locale.value = lang;
+    };
+
+    // 切换路由
+    const handleClick = (tab) => { // 删除类型注解
+      //console.log(tab.props.name);
+      switch (tab.props.name) {
+        case 'first':
+          router.push('/') // 跳转到主页
+          break
+        case 'second':
+          router.push('/about') // 跳转到关于页面
+          break
+        default:
+          break
+      }
+    }
+
+    return {
+      activeName, // 返回 activeName 变量
+      changeLanguage, // 返回 changeLanguage 方法
+      handleClick // 返回 handleClick 方法
+    };
   }
-}
+};
 
 </script>
 
@@ -69,9 +98,16 @@ export default {
 }
 
 .header {
-  background-color: #81c5f6be;
-  width: 100vw;
+  width: 95vw;
   height: 4vh;
+  padding-left: 1%;
   padding-top: 1vh;
+  display: flex;
+  justify-content: space-between;
+}
+
+.dropdown {
+  position: absolute;
+  right: 5%;
 }
 </style>
