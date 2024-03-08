@@ -110,4 +110,5 @@ export default {
   position: absolute;
   right: 5%;
 }
+
 </style>

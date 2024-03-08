@@ -8,19 +8,19 @@
       <el-steps :active="steps" finish-status="success" align-center>
         <el-step :title="$t('start.upload')" />
         <el-step :title="$t('start.choosemethod')" />
-        <el-step title="标注图片及处理" />
-        <el-step title="展示数据" />
-        <el-step title="样品处理" />
+        <el-step :title="$t('start.imgLabel')" />
+        <el-step :title="$t('start.dataShow')" />
+        <el-step :title="$t('start.smpProcess')" />
       </el-steps>
     </div>
 
     <div class="upload" v-if="steps == 0" style="text-align: center;">
       <el-upload list-type="text" action='' accept=".jpg, .png" :limit="1" :auto-upload="false" :on-change="getFile"
         :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove">
-        <el-button type="primary">选择图片上传</el-button>
+        <el-button type="primary">{{$t('start.uploadButton')}}</el-button>
         <br>
         <template #tip>
-          <div slot="tip" class="el-upload__tip">只能上传一张jpg/png文件</div>
+          <div slot="tip" class="el-upload__tip">{{$t('start.uploadInfo')}}</div>
         </template>
       </el-upload>
       <img :src="showimg(proofImage)" class="image-container" v-if="Visible" />
@@ -29,11 +29,11 @@
     <!-- 选择方法 -->
     <div class="card" v-if="steps == 1" style="width: 80%; margin: auto; padding: auto;">
       <div>
-        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" @click="choosemethod(1)"> 处理方式1 (默认)
+        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" @click="choosemethod(1)">{{ $t('start.method1') }}
         </el-card>
       </div>
       <div>
-        <el-card shadow="hover" @click="choosemethod(2)"> 处理方式2 </el-card>
+        <el-card shadow="hover" @click="choosemethod(2)"> {{ $t('start.method2') }} </el-card>
       </div>
     </div>
 
