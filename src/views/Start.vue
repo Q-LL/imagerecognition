@@ -56,18 +56,18 @@
     <div class="sign" v-if="steps == 2">
       <el-table :data="points" v-if="Visible" style="width: 100%">
         <el-table-column prop="id" label="id" width="50" />
-        <el-table-column prop="x" label="x轴坐标" width="180" />
-        <el-table-column prop="y" label="y轴坐标" width="180" />
-        <el-table-column prop="cir" label="半径" width="180" />
-        <el-table-column label="操作">
+        <el-table-column prop="x" :label="$t('start.xLabel')" width="180" />
+        <el-table-column prop="y" :label="$t('start.yLabel')" width="180" />
+        <el-table-column prop="cir" :label="$t('start.cirLabel')" width="180" />
+        <el-table-column :label="$t('start.options')">
 
           <template #default="scope"><el-button size="small" type="danger" :disabled="isDeleteDisabled(scope.row.id)"
-              @click="delpoint(scope.row.id)">删除</el-button></template>
+              @click="delpoint(scope.row.id)">{{ $t('start.delete') }}</el-button></template>
         </el-table-column>
-        <el-table-column label="xValue">
+        <el-table-column :label="$t('start.xValueLable')">
 
           <template #default="scope"><el-input v-model="xValue[scope.row.id - 1]"
-              placeholder="请输入xValue"></el-input></template>
+              :placeholder="$t('start.typeInfo')"></el-input></template>
         </el-table-column>
       </el-table>
     </div>
