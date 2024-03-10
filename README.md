@@ -23,6 +23,11 @@ cd OnlineV1
 uvicorn server:app --reload
 ```
 
+# 项目依赖环境
+
+本地部署依赖环境
+`node.js 18.0+`   `Vue CLI 5.0+`
+
 ## 项目安装必要模块
 
 ```
@@ -47,4 +52,3 @@ npm run build
 cd OnlineV1
 uvicorn server:app --reload
 ```
-

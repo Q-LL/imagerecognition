@@ -131,17 +131,17 @@
         </div>
       </div>
       <div class="sign">
-        <el-table :data="points2" v-if="Visible2" style="width: 100%">
+        <el-table :data="points2" v-if="Visible2" style="width: 95%">
           <el-table-column prop="id" :label="$t('start.pointID')" width="100" />
           <el-table-column prop="x" :label="$t('start.xLabel')" width="180" />
           <el-table-column prop="y" :label="$t('start.yLabel')" width="180" />
           <el-table-column prop="cir" :label="$t('start.cirLabel')" width="180" />
-          <el-table-column :label="$t('start.options')">
+          <el-table-column :label="$t('start.options')" width="180">
 
             <template #default="scope"><el-button size="small" type="danger"
                 @click="delpoint2(scope.row.id)">{{ $t('start.delete') }}</el-button></template>
           </el-table-column>
-          <el-table-column :label="$t('start.result')" v-if="!(sampleresult == null)">{{ sampleresult[0].toFixed(3) + '±' +
+          <el-table-column :label="$t('start.result')" v-if="!(sampleresult == null)" >{{ sampleresult[0].toFixed(3) + '±' +
             sampleresult[1].toFixed(3)
           }}</el-table-column>
         </el-table>

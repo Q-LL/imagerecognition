@@ -11,7 +11,7 @@
       </el-tabs>
     </div>
     <div class="dropdown">
-      <el-dropdown>
+      <el-dropdown style="">
         <el-button type="primary">
           {{ $t('app.language') }}<el-icon class="el-icon--right">
             <ArrowDownBold />
@@ -24,7 +24,10 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <el-link icon="" href="https://github.com/your-project" target="_blank"></el-link>
+      <a href="https://github.com/Q-LL/imagerecognition" target="newwindows">
+        <el-image style="width:30%; padding-top: 2%; padding-left: 10%;" :src="require('./assets/GitHub_Logo.png')" :fit="fit" />
+      </a>
+      <!-- <el-link icon="" href="https://github.com/your-project" target="_blank"></el-link> -->
     </div>
   </div>
 </template>
@@ -108,7 +111,7 @@ export default {
 
 .dropdown {
   position: absolute;
-  right: 5%;
+  width: 15vw;
+  right: 1%;
 }
-
 </style>
