@@ -55,7 +55,7 @@
     <!-- 展示标注数据 -->
     <div class="sign" v-if="steps == 2">
       <el-table :data="points" v-if="Visible" style="width: 100%">
-        <el-table-column prop="id" label="id" width="50" />
+        <el-table-column prop="id" :label="$t('start.pointID')" width="100" />
         <el-table-column prop="x" :label="$t('start.xLabel')" width="180" />
         <el-table-column prop="y" :label="$t('start.yLabel')" width="180" />
         <el-table-column prop="cir" :label="$t('start.cirLabel')" width="180" />
@@ -74,14 +74,14 @@
 
     <!-- 用户输入数据 -->
     <div class="input" v-if="steps == 2" style="text-align: center; padding-top: 20px; padding-bottom: 20px;">
-      <row style="padding-left: 10px; padding-bottom: 10px;">&nbsp;&nbsp;&nbsp;使用自动方程 <el-checkbox
+      <row style="padding-left: 10px; padding-bottom: 10px;">&nbsp;&nbsp;&nbsp;{{ $t('start.autoFunc') }} <el-checkbox
           v-model="notAutoFunc"></el-checkbox></row>
-      <row>&nbsp;&nbsp;&nbsp;Function:<el-input class="custom-input" :disabled="notAutoFunc" v-model="functions"
-          placeholder="请输入 Function" style="width: 500px;"></el-input></row><br>
-      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;请输入计算目标R^2:<el-input class="custom-input" v-model="Goal"
-          placeholder="请输入 Goal(选填)"></el-input></row>
-      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;请输入最大迭代次数:<el-input class="custom-input" v-model="iteration"
-          placeholder="请输入 iteration(选填)"></el-input></row><br>
+      <row>&nbsp;&nbsp;&nbsp;{{ $t('start.Func') }}:<el-input class="custom-input" :disabled="notAutoFunc" v-model="functions"
+           style="width: 500px;"></el-input></row><br>
+      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.r2Goal') }}:<el-input class="custom-input" v-model="Goal"
+          ></el-input></row>
+      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.itreationGoal') }}:<el-input class="custom-input" v-model="iteration"
+          ></el-input></row><br>
       <!-- <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;<p>当前进度:{{ autoFuncProgress }}</p></row> -->
       <div v-if="notAutoFunc" style="width: 80%; margin: auto; padding-bottom: 10px;">
         <el-progress :percentage="Math.round(autoFuncProgress*100)" />
@@ -97,12 +97,12 @@
     <div class="charts" style="width: 80%; height:100vh; margin: auto; " v-if="steps == 3">
       <!-- <div id="chartpointsmap" style="width:90%;height:60vh;"></div> -->
       <chartpointsmap :ponints="chartsdatapoint" :linexy="chartresult" />
-      <p id="lineFunc" style="text-align: center;">直线方程: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >=
+      <p id="lineFunc" style="text-align: center;">{{ $t('start.lineFunc') }}: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >=
         0 ?
         ' + ' : '' }}{{ Math.abs(chartresult[1]).toFixed(3) }} ,R² = {{ chartresult[2].toFixed(3) }}</p><br>
 
         <div style="text-align: center;">
-          <el-button type="primary" @click="dataDownload()">下载数据</el-button>
+          <el-button type="primary" @click="dataDownload()">{{ $t('start.dataDownload') }}</el-button>
         </div>
     </div>
 
@@ -111,11 +111,11 @@
       <div class="upload" style="text-align: center;">
         <el-upload list-type="text" action='' accept=".jpg, .png" :limit="1" :auto-upload="false" :on-change="getFile2"
           :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove2">
-          <el-button type="primary">选择图片上传</el-button>
+          <el-button type="primary">{{$t('start.uploadButton')}}</el-button>
           <br>
 
           <template #tip>
-            <div slot="tip" class="el-upload__tip">只能上传一张jpg/png文件</div>
+            <div slot="tip" class="el-upload__tip">{{$t('start.uploadInfo')}}</div>
           </template>
         </el-upload>
       </div>
@@ -132,16 +132,16 @@
       </div>
       <div class="sign">
         <el-table :data="points2" v-if="Visible2" style="width: 100%">
-          <el-table-column prop="id" label="id" width="50" />
-          <el-table-column prop="x" label="x轴坐标" width="180" />
-          <el-table-column prop="y" label="y轴坐标" width="180" />
-          <el-table-column prop="cir" label="半径" width="180" />
-          <el-table-column label="操作">
+          <el-table-column prop="id" :label="$t('start.pointID')" width="100" />
+          <el-table-column prop="x" :label="$t('start.xLabel')" width="180" />
+          <el-table-column prop="y" :label="$t('start.yLabel')" width="180" />
+          <el-table-column prop="cir" :label="$t('start.cirLabel')" width="180" />
+          <el-table-column :label="$t('start.options')">
 
             <template #default="scope"><el-button size="small" type="danger"
-                @click="delpoint2(scope.row.id)">删除</el-button></template>
+                @click="delpoint2(scope.row.id)">{{ $t('start.delete') }}</el-button></template>
           </el-table-column>
-          <el-table-column label="结果" v-if="!(sampleresult == null)">{{ sampleresult[0].toFixed(3) + '±' +
+          <el-table-column :label="$t('start.result')" v-if="!(sampleresult == null)">{{ sampleresult[0].toFixed(3) + '±' +
             sampleresult[1].toFixed(3)
           }}</el-table-column>
         </el-table>
@@ -156,9 +156,9 @@
     <!-- 步骤条 -->
     <div class="button"
       style="text-align: center; position: fixed; margin-top: 10px; bottom: 10px; width: 100%; z-index:10">
-      <el-button @click="laststep()" :disabled="steps <= 0" type="warning">上一步</el-button>
+      <el-button @click="laststep()" :disabled="steps <= 0" type="warning">{{ $t('start.previousButton') }}</el-button>
       <el-button @click="nextstep()" v-if="steps < 4" :disabled="!Visible || (steps == 2 && chartpoints == null)"
-        type="primary">下一步</el-button>
+        type="primary">{{ $t('start.nextButton') }}</el-button>
     </div>
   </div>
   <!-- 错误提示 -->
@@ -201,7 +201,7 @@ export default {
       pointsid: 0,//点的个数
       points: [], // 存储标点的坐标
       circle: 5,//滑块半径
-      functions: 'R/G',
+      functions: null,
       xValue: [],
       Goal: '0.95',
       iteration: '20000',

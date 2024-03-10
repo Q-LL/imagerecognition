@@ -27,10 +27,12 @@ export default{
     xValueLable:"x Values",
     typeInfo:"Enter a value",
     autoFunc:"Automatic equation generation",
+    Func:"Function",
     r2Goal:"Target R^2 Value",
     iterationGoal:"Maximum number of iterations",
     lineFunc:"linear equation",
     dataDownload:"Data download",
+    result:"Result",
   },
 
 };

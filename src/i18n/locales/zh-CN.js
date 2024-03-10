@@ -27,10 +27,12 @@ export default{
     xValueLable:"x轴坐标值",
     typeInfo:"请输入数值",
     autoFunc:"自动生成方程",
+    Func:"方程",
     r2Goal:"请输入目标R^2",
     iterationGoal:"请输入最大迭代次数",
     lineFunc:"直线方程",
     dataDownload:"下载数据",
+    result:"结果",
   },
 
 };
