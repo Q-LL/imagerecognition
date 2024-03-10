@@ -5,7 +5,7 @@ export default{
     language:"选择语言",
   },
   start:{
-    start:"开始使用",
+    start:"图像颜色识别工具",
     upload:"上传图片",
 
     choosemethod:"选择处理方法",

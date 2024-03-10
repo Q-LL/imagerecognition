@@ -25,7 +25,7 @@
         </template>
       </el-dropdown>
       <a href="https://github.com/Q-LL/imagerecognition" target="newwindows">
-        <el-image style="width:30%; padding-top: 2%; padding-left: 10%;" :src="require('./assets/GitHub_Logo.png')" :fit="fit" />
+        <el-image style="width:25%; padding-top: 1%; padding-left: 10%;" :src="require('./assets/GitHub_Logo.png')" :fit="fit" />
       </a>
       <!-- <el-link icon="" href="https://github.com/your-project" target="_blank"></el-link> -->
     </div>

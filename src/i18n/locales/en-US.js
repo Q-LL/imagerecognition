@@ -5,7 +5,7 @@ export default{
     language:"Language",
   },
   start:{
-    start:"Start",
+    start:"Image color recognition tool",
     upload:"Upload Image",
 
     choosemethod:"Linear fitting method",
