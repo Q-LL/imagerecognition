@@ -19,6 +19,16 @@
 ### 本地部署调试指南
 > 配置项目之前确保安装有[Node.js 18.0+](https://nodejs.org/en)以及[Python 3.8+](https://www.python.org)并且配置完成系统环境
 
+安装Vue@CIL
+
+```
+npm install
+npm run serve
+npm run build
+cd OnlineV1
+uvicorn server:app --reload
+```
+
 
 ### Web站点部署指南
 

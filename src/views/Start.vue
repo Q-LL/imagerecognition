@@ -17,10 +17,10 @@
     <div class="upload" v-if="steps == 0" style="text-align: center;">
       <el-upload list-type="text" action='' accept=".jpg, .png" :limit="1" :auto-upload="false" :on-change="getFile"
         :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove">
-        <el-button type="primary">{{$t('start.uploadButton')}}</el-button>
+        <el-button type="primary">{{ $t('start.uploadButton') }}</el-button>
         <br>
         <template #tip>
-          <div slot="tip" class="el-upload__tip">{{$t('start.uploadInfo')}}</div>
+          <div slot="tip" class="el-upload__tip">{{ $t('start.uploadInfo') }}</div>
         </template>
       </el-upload>
       <img :src="showimg(proofImage)" class="image-container" v-if="Visible" />
@@ -29,7 +29,8 @@
     <!-- 选择方法 -->
     <div class="card" v-if="steps == 1" style="width: 80%; margin: auto; padding: auto;">
       <div>
-        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" @click="choosemethod(1)">{{ $t('start.method1') }}
+        <el-card shadow="hover" style="margin-top: 20px; margin-bottom: 20px;" @click="choosemethod(1)">{{
+      $t('start.method1') }}
         </el-card>
       </div>
       <div>
@@ -76,34 +77,36 @@
     <div class="input" v-if="steps == 2" style="text-align: center; padding-top: 20px; padding-bottom: 20px;">
       <row style="padding-left: 10px; padding-bottom: 10px;">&nbsp;&nbsp;&nbsp;{{ $t('start.autoFunc') }} <el-checkbox
           v-model="notAutoFunc"></el-checkbox></row>
-      <row>&nbsp;&nbsp;&nbsp;{{ $t('start.Func') }}:<el-input class="custom-input" :disabled="notAutoFunc" v-model="functions"
-           style="width: 500px;"></el-input></row><br>
-      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.r2Goal') }}:<el-input class="custom-input" v-model="Goal"
-          ></el-input></row>
-      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.itreationGoal') }}:<el-input class="custom-input" v-model="iteration"
-          ></el-input></row><br>
+      <row>&nbsp;&nbsp;&nbsp;{{ $t('start.Func') }}:<el-input class="custom-input" :disabled="notAutoFunc"
+          v-model="functions" style="width: 500px;"></el-input></row>
+      <br>
+      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.r2Goal') }}:<el-input class="custom-input"
+          v-model="Goal"></el-input></row>
+      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.itreationGoal') }}:<el-input class="custom-input"
+          v-model="iteration"></el-input></row><br>
       <!-- <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;<p>当前进度:{{ autoFuncProgress }}</p></row> -->
       <div v-if="notAutoFunc" style="width: 80%; margin: auto; padding-bottom: 10px;">
-        <el-progress :percentage="Math.round(autoFuncProgress*100)" />
+        <el-progress :percentage="Math.round(autoFuncProgress * 100)" />
       </div>
       <div>
         <el-button @click="makedata()" :loading="loading" :disabled="loading || pointsid == 0" :type="buttontype">{{
-          buttonText
-        }}</el-button>
+      buttonText
+    }}</el-button>
       </div>
     </div>
 
     <!-- 图表  -->
     <div class="charts" style="width: 80%; height:100vh; margin: auto; " v-if="steps == 3">
-      <!-- <div id="chartpointsmap" style="width:90%;height:60vh;"></div> -->
       <chartpointsmap :ponints="chartsdatapoint" :linexy="chartresult" />
-      <p id="lineFunc" style="text-align: center;">{{ $t('start.lineFunc') }}: y = {{ chartresult[0].toExponential(3) }}x{{ chartresult[1] >=
+      <p id="lineFunc" style="text-align: center;">{{ $t('start.lineFunc') }}: y = {{ chartresult[0].toExponential(3)
+        }}x{{
+      chartresult[1] >=
         0 ?
         ' + ' : '' }}{{ Math.abs(chartresult[1]).toFixed(3) }} ,R² = {{ chartresult[2].toFixed(3) }}</p><br>
 
-        <div style="text-align: center;">
-          <el-button type="primary" @click="dataDownload()">{{ $t('start.dataDownload') }}</el-button>
-        </div>
+      <div style="text-align: center;">
+        <el-button type="primary" @click="dataDownload()">{{ $t('start.dataDownload') }}</el-button>
+      </div>
     </div>
 
     <!-- 样品处理 -->
@@ -111,11 +114,11 @@
       <div class="upload" style="text-align: center;">
         <el-upload list-type="text" action='' accept=".jpg, .png" :limit="1" :auto-upload="false" :on-change="getFile2"
           :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove2">
-          <el-button type="primary">{{$t('start.uploadButton')}}</el-button>
+          <el-button type="primary">{{ $t('start.uploadButton') }}</el-button>
           <br>
 
           <template #tip>
-            <div slot="tip" class="el-upload__tip">{{$t('start.uploadInfo')}}</div>
+            <div slot="tip" class="el-upload__tip">{{ $t('start.uploadInfo') }}</div>
           </template>
         </el-upload>
       </div>
@@ -138,12 +141,13 @@
           <el-table-column prop="cir" :label="$t('start.cirLabel')" width="180" />
           <el-table-column :label="$t('start.options')" width="180">
 
-            <template #default="scope"><el-button size="small" type="danger"
-                @click="delpoint2(scope.row.id)">{{ $t('start.delete') }}</el-button></template>
+            <template #default="scope"><el-button size="small" type="danger" @click="delpoint2(scope.row.id)">{{
+      $t('start.delete') }}</el-button></template>
           </el-table-column>
-          <el-table-column :label="$t('start.result')" v-if="!(sampleresult == null)" >{{ sampleresult[0].toFixed(3) + '±' +
-            sampleresult[1].toFixed(3)
-          }}</el-table-column>
+          <el-table-column :label="$t('start.result')" v-if="!(sampleresult == null)">{{ sampleresult[0].toFixed(3) +
+      '±' +
+      sampleresult[1].toFixed(3)
+            }}</el-table-column>
         </el-table>
       </div>
       <div style="text-align: center; padding-top: 15px;">
@@ -170,6 +174,7 @@
 <script>
 import { connectWebSocket, sampleWebSocket } from '@/axios';
 import chartpointsmap from '@/components/chartspoints.vue'
+
 
 function getNumber(theNumber) {
   if (theNumber > 0) {
@@ -239,7 +244,7 @@ export default {
       sampleresult: null,
 
       //下载数据
-      downloaData:[],
+      downloaData: [],
       //错误处理
       errorMessage: null,
     }
@@ -426,11 +431,12 @@ export default {
     //处理发送数据
     makedata() {
       // 创建一个空对象
+      this.autoFuncProgress = 0;
       const dataToSend = {};
       dataToSend.image = this.proofImage[0] + ',' + this.proofImage[1];
       dataToSend.circles = this.points.map(point => `${point.x},${point.y},${this.circle}`).join("\n");
       dataToSend.function = this.functions;
-      console.log(this.xValue.length,this.points.length)
+      console.log(this.xValue.length, this.points.length)
       if (this.xValue.length !== this.points.length) {
         ElNotification({
           title: 'Error',
@@ -564,7 +570,7 @@ export default {
         mode: 'markers',
         type: 'scatter',
         name: 'Data Points',
-        line: {color : '#002f49'}
+        line: { color: '#002f49' }
       },
       {
         x: [(x.at(0) - 0.1 * (x.at(-1) - x.at(0))), (x.at(-1) + 0.1 * (x.at(-1) - x.at(0)))],
@@ -572,15 +578,15 @@ export default {
         mode: 'lines',
         type: 'scatter',
         name: 'Fitting Line',
-        line: {color : '#669bbb'}
+        line: { color: '#669bbb' }
       }];
       //console.log(this.chartsdatapoint);
     },
 
     //数据下载
-    dataDownload(){
+    dataDownload() {
       let dataToDownload = '';
-      let functionText = ('slope='+this.chartresult[0]+',intercept='+this.chartresult[1]+',r^2='+this.chartresult[2]);
+      let functionText = ('slope=' + this.chartresult[0] + ',intercept=' + this.chartresult[1] + ',r^2=' + this.chartresult[2]);
       dataToDownload += functionText;
       dataToDownload += '\n';
       dataToDownload += 'x,y,error_y\n';
@@ -601,21 +607,24 @@ export default {
     },
     //步骤
     nextstep() {
-      this.buttontype = 'primary',
-        this.loading = false,
-        this.buttonText = '开始处理',
-        this.steps = this.steps + 1;
+      this.buttontype = 'primary';
+      this.loading = false;
+      this.buttonText = '开始处理';
+      this.steps = this.steps + 1;
       if (this.steps == 2 && this.scale == null) {
         this.$nextTick(() => {
           this.autoclick();
         });
-      }
+      };
+      if (this.steps == 3 && this.autoFuncProgress != null) {
+        this.autoFuncProgress = null;
+      };
     },
     laststep() {
-      this.buttontype = 'primary',
-        this.loading = false,
-        this.buttonText = '开始处理',
-        this.steps = this.steps - 1;
+      this.buttontype = 'primary';
+      this.loading = false;
+      this.buttonText = '开始处理';
+      this.steps = this.steps - 1;
     }
 
   },
@@ -634,6 +643,8 @@ export default {
     // 返回 false 或不返回任何值，错误会向上传播到全局错误处理器
     return true;
   },
+
+
 }
 </script>
 

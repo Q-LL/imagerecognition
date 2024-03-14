@@ -12,7 +12,6 @@
     "@jamescoyle/vue-icon": "^0.1.2",
     "@kangc/v-md-editor": "^2.3.18",
     "@mdi/js": "^7.4.47",
-    "@vueuse/core": "^10.7.2",
     "assert": "^2.1.0",
     "axios": "^1.6.7",
     "core-js": "^3.8.3",
