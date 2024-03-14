@@ -38,14 +38,18 @@ def linear(x, m, b):
     # 定义直线模型
     return m*x + b
 
+
 def is_nan(value):
     return value != value
 
+
 async def send_status(websocket, iteration, r_squared):
-    sendStatus = json.dumps({"status": "busy", "iteration": iteration + 1, "R2": r_squared})
+    sendStatus = json.dumps(
+        {"status": "busy", "iteration": iteration + 1, "R2": r_squared})
     await websocket.send_text(sendStatus)
     # print(sendStatus)
-    
+
+
 async def train_model(websocket, messageIn, trainData):
     # 进行自动计算
     goalR2 = float(messageIn['Goal'])
@@ -77,10 +81,10 @@ async def train_model(websocket, messageIn, trainData):
         gradient = np.zeros(6)
         for i in range(3):
             gradient[i] = np.sum(2 * (model_output - concentration_values)
-                                    * RGB_values[:, i] / np.dot(RGB_values, parameters[3:]))
+                                 * RGB_values[:, i] / np.dot(RGB_values, parameters[3:]))
         for i in range(3, 6):
             gradient[i] = np.sum(-2 * (model_output - concentration_values) *
-                                    model_output * RGB_values[:, i-3] / np.dot(RGB_values, parameters[3:])**2)
+                                 model_output * RGB_values[:, i-3] / np.dot(RGB_values, parameters[3:])**2)
         m = optimizer['beta1'] * m + \
             (1 - optimizer['beta1']) * gradient
         v = optimizer['beta2'] * v + \
@@ -92,11 +96,11 @@ async def train_model(websocket, messageIn, trainData):
         if (iteration % 100) == 9:
             asyncio.create_task(send_status(websocket, iteration, r_squared))
             # print(iteration, r_squared)
-        if r_squared > goalR2: 
+        if r_squared > goalR2:
             break
         await asyncio.sleep(0)
-    return r_squared , parameters
-    
+    return r_squared, parameters
+
 app = FastAPI()
 
 methord = 1  # 用于设置切换拟合算法，
@@ -140,7 +144,7 @@ async def process_image_standerd(websocket: WebSocket):
         xValueIn = pd.read_csv(io.StringIO(
             messageIn['xValue']), header=None).values
         # 传入横坐标即为浓度数值，必须参数
-        
+
         trainData = []
         # 存储用于训练的数据
         results = []
@@ -151,7 +155,7 @@ async def process_image_standerd(websocket: WebSocket):
         for index, circle in enumerate(circles):
             points.append([(random.randint(circle[0]-circle[2], circle[0]+circle[2]),
                             random.randint(circle[1]-circle[2], circle[1]+circle[2]))
-                            for _ in range(randomNum)])
+                           for _ in range(randomNum)])
             # 用于随机获取采样点，每个圆范围内20个
             if notAutoFunc == True:
                 # 不使用自动求解器
@@ -171,7 +175,7 @@ async def process_image_standerd(websocket: WebSocket):
                         orImg[y, x, 2], orImg[y, x, 1], orImg[y, x, 0], xValueIn[index][0]]
                     trainData.append(trainDataNow)
         if notAutoFunc == False:
-            r_squared , parameters = await train_model(websocket, messageIn, trainData)
+            r_squared, parameters = await train_model(websocket, messageIn, trainData)
             final_output = {"status": "done", "R2": r_squared,
                             "Model": f"({parameters[0]}*R + {parameters[1]}*G + {parameters[2]}*B) / ({parameters[3]}*R + {parameters[4]}*G + {parameters[5]}*B)"}
             userFunc = create_function(final_output["Model"])
@@ -200,7 +204,7 @@ async def process_image_standerd(websocket: WebSocket):
         if methord == 1:
             slope, intercept, r_value, p_value, std_err = linregress(
                 xValues, yValues)
-            if(is_nan(slope) or is_nan(intercept) or is_nan(r_value)):
+            if (is_nan(slope) or is_nan(intercept) or is_nan(r_value)):
                 slope = 0
                 intercept = 0
                 r_value = 0
@@ -256,9 +260,9 @@ async def process_image_sample(websocket: WebSocket):
         points = []
         results = []
         for index, circle in enumerate(circles):
-            points.append([(random.randint(circle[0]-circle[2], circle[0]+circle[2]),
-                            random.randint(circle[1]-circle[2], circle[1]+circle[2]))
-                            for _ in range(randomNum)])
+            points.append([(random.randint(circle[0]-int(circle[2]/1.42), circle[0]+int(circle[2]/1.42)),
+                            random.randint(circle[1]-int(circle[2]/1.42), circle[1]+int(circle[2]/1.42)))
+                           for _ in range(randomNum)])
             rat = []
             for x, y in points[index]:
                 rat.append(userFunc(smpImg[y, x, 0],
@@ -268,7 +272,7 @@ async def process_image_sample(websocket: WebSocket):
         result = [np.mean(results), np.std(results)]
         smpRes = [(result[0]-intercept)/slope, result[1]/slope]
         if is_nan(result[0]) or is_nan(result[1]):
-            smpRes = [0,0]
+            smpRes = [0, 0]
         await websocket.send_text(json.dumps({"status": "done", "result": smpRes}))
         # 传回处理结果，格式为{"status": "done", "result": [result,result_err]}
         await websocket.close()
