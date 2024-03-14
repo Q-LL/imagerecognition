@@ -10,6 +10,7 @@ import random
 import pandas as pd
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
+import asyncio
 
 
 np.seterr(divide='ignore')
@@ -40,6 +41,62 @@ def linear(x, m, b):
 def is_nan(value):
     return value != value
 
+async def send_status(websocket, iteration, r_squared):
+    sendStatus = json.dumps({"status": "busy", "iteration": iteration + 1, "R2": r_squared})
+    await websocket.send_text(sendStatus)
+    # print(sendStatus)
+    
+async def train_model(websocket, messageIn, trainData):
+    # 进行自动计算
+    goalR2 = float(messageIn['Goal'])
+    # 解算目标R2
+    iterations = int(messageIn['iteration'])
+    # 目标迭代次数
+    trainDataDf = pd.DataFrame(
+        trainData, columns=['R', 'G', 'B', 'x'])
+    RGB_values = trainDataDf[['R', 'G', 'B']].values
+    concentration_values = trainDataDf['x'].values
+
+    # 初始化参数和优化器
+    parameters = np.random.rand(6)
+    optimizer = {'beta1': 0.9, 'beta2': 0.999, 'epsilon': 1e-8}
+    m = np.zeros(6)
+    v = np.zeros(6)
+
+    # 模型训练
+    for iteration in range(iterations):
+        model_output = np.dot(
+            RGB_values, parameters[:3]) / np.dot(RGB_values, parameters[3:])
+        combined_data = np.column_stack(
+            (concentration_values, model_output))
+        linear_reg_model = LinearRegression()
+        linear_reg_model.fit(
+            combined_data[:, 0].reshape(-1, 1), combined_data[:, 1])
+        r_squared = r2_score(combined_data[:, 1], linear_reg_model.predict(
+            combined_data[:, 0].reshape(-1, 1)))
+        gradient = np.zeros(6)
+        for i in range(3):
+            gradient[i] = np.sum(2 * (model_output - concentration_values)
+                                    * RGB_values[:, i] / np.dot(RGB_values, parameters[3:]))
+        for i in range(3, 6):
+            gradient[i] = np.sum(-2 * (model_output - concentration_values) *
+                                    model_output * RGB_values[:, i-3] / np.dot(RGB_values, parameters[3:])**2)
+        m = optimizer['beta1'] * m + \
+            (1 - optimizer['beta1']) * gradient
+        v = optimizer['beta2'] * v + \
+            (1 - optimizer['beta2']) * (gradient ** 2)
+        m_hat = m / (1 - optimizer['beta1'] ** (iteration + 1))
+        v_hat = v / (1 - optimizer['beta2'] ** (iteration + 1))
+        parameters -= m_hat / \
+            (np.sqrt(v_hat) + optimizer['epsilon'])
+        if (iteration % 100) == 9:
+            asyncio.create_task(send_status(websocket, iteration, r_squared))
+            # print(iteration, r_squared)
+        if r_squared > goalR2: 
+            break
+        await asyncio.sleep(0)
+    return r_squared , parameters
+    
 app = FastAPI()
 
 methord = 1  # 用于设置切换拟合算法，
@@ -114,57 +171,7 @@ async def process_image_standerd(websocket: WebSocket):
                         orImg[y, x, 2], orImg[y, x, 1], orImg[y, x, 0], xValueIn[index][0]]
                     trainData.append(trainDataNow)
         if notAutoFunc == False:
-            # 进行自动计算
-            goalR2 = float(messageIn['Goal'])
-            # 解算目标R2
-            iterations = int(messageIn['iteration'])
-            # 目标迭代次数
-            trainDataDf = pd.DataFrame(
-                trainData, columns=['R', 'G', 'B', 'x'])
-            RGB_values = trainDataDf[['R', 'G', 'B']].values
-            concentration_values = trainDataDf['x'].values
-
-            # 初始化参数和优化器
-            parameters = np.random.rand(6)
-            optimizer = {'beta1': 0.9, 'beta2': 0.999, 'epsilon': 1e-8}
-            m = np.zeros(6)
-            v = np.zeros(6)
-
-            # 模型训练
-            for iteration in range(iterations):
-                model_output = np.dot(
-                    RGB_values, parameters[:3]) / np.dot(RGB_values, parameters[3:])
-                combined_data = np.column_stack(
-                    (concentration_values, model_output))
-                linear_reg_model = LinearRegression()
-                linear_reg_model.fit(
-                    combined_data[:, 0].reshape(-1, 1), combined_data[:, 1])
-                r_squared = r2_score(combined_data[:, 1], linear_reg_model.predict(
-                    combined_data[:, 0].reshape(-1, 1)))
-                gradient = np.zeros(6)
-                for i in range(3):
-                    gradient[i] = np.sum(2 * (model_output - concentration_values)
-                                            * RGB_values[:, i] / np.dot(RGB_values, parameters[3:]))
-                for i in range(3, 6):
-                    gradient[i] = np.sum(-2 * (model_output - concentration_values) *
-                                            model_output * RGB_values[:, i-3] / np.dot(RGB_values, parameters[3:])**2)
-                m = optimizer['beta1'] * m + \
-                    (1 - optimizer['beta1']) * gradient
-                v = optimizer['beta2'] * v + \
-                    (1 - optimizer['beta2']) * (gradient ** 2)
-                m_hat = m / (1 - optimizer['beta1'] ** (iteration + 1))
-                v_hat = v / (1 - optimizer['beta2'] ** (iteration + 1))
-                parameters -= m_hat / \
-                    (np.sqrt(v_hat) + optimizer['epsilon'])
-                if (iteration % 100) == 9:
-                    sendStatus = json.dumps(
-                        {"status": "busy", "iteration": iteration + 1, "R2": r_squared})
-                    
-                    await websocket.send_text(sendStatus)
-                    print(sendStatus)
-                if r_squared > goalR2: 
-                    break
-            # 发送最终结果
+            r_squared , parameters = await train_model(websocket, messageIn, trainData)
             final_output = {"status": "done", "R2": r_squared,
                             "Model": f"({parameters[0]}*R + {parameters[1]}*G + {parameters[2]}*B) / ({parameters[3]}*R + {parameters[4]}*G + {parameters[5]}*B)"}
             userFunc = create_function(final_output["Model"])

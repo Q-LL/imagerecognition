@@ -15,3 +15,6 @@
     - The progress bar used to indicate the status of automatic processing is unavailable
 
 ## How To Use
+
+## How does it works?
+The following figure illustrates the working principles of the webpage and server
