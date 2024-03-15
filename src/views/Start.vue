@@ -80,11 +80,11 @@
       <row>&nbsp;&nbsp;&nbsp;{{ $t('start.Func') }}:<el-input class="custom-input" :disabled="notAutoFunc"
           v-model="functions" style="width: 500px;"></el-input></row>
       <!-- 复制 -->
-      <row><el-button @click="handleCopy" style="margin-left: 10px; margin-bottom: 9px;">复制</el-button></row>
+      <row><el-button @click="handleCopy" style="margin-left: 10px; margin-bottom: 9px;">{{ $t('start.copyText') }}</el-button></row>
       <br>
       <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.r2Goal') }}:<el-input class="custom-input"
           v-model="Goal"></el-input></row>
-      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.itreationGoal') }}:<el-input class="custom-input"
+      <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.iterationGoal') }}:<el-input class="custom-input"
           v-model="iteration"></el-input></row><br>
       <!-- <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;<p>当前进度:{{ autoFuncProgress }}</p></row> -->
       <div v-if="notAutoFunc" style="width: 80%; margin: auto; padding-bottom: 10px;">
