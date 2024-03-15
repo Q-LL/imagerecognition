@@ -27,7 +27,7 @@ function connectWebSocket (data) {
 function sampleWebSocket (data) {
   return new Promise((resolve, reject) => {
     // 直接使用websocket的URL创建一个WebSocket对象
-    const socket = new WebSocket('ws://8.134.135.135:8866/sample') // 修改这里
+    const socket = new WebSocket('wss://8.134.135.135:8866/sample') // 修改这里
     // 设置websocket的事件监听器
     socket.onopen = () => {
       // 连接成功后，发送数据

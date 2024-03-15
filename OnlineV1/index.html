@@ -78,7 +78,7 @@
             var iteration = document.getElementById('iteration').value;
             var methord = document.getElementById('methord').checked;
             var file = fileInput.files[0];
-            const ws = new WebSocket("ws://127.0.0.1:8000/standard");
+            const ws = new WebSocket("wss://api.fooood.life/standard");
             ws.onopen = function (wsevent) {
                 console.log('WebSocket 3', wsevent);
                 var reader = new FileReader();
@@ -123,7 +123,7 @@
             var circle = document.getElementById("smpCircle").value;
             var file = fileInput.files[0];
             var func = document.getElementById("function").value;
-            const ws = new WebSocket("ws://127.0.0.1:8000/sample");
+            const ws = new WebSocket("wss://api.fooood.life/sample");
             ws.onopen = function (wsevent) {
                 console.log("Sample WebSocket connection established.");
                 var reader = new FileReader();
