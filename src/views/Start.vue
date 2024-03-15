@@ -502,12 +502,8 @@ export default {
                 console.log(this.autoFuncProgress);
               }
               else if (this.message.status == 'done') {
-                this.autoFuncProgress == 1;
+                this.autoFuncProgress = 1;
                 this.functions = this.message.Model;
-              }
-              if (this.message.status == "done") {
-                //console.log(this.message.Model);
-
               }
               else if (this.message.status == "success") {
                 this.chartresult = this.message.result;
