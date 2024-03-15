@@ -79,6 +79,8 @@
           v-model="notAutoFunc"></el-checkbox></row>
       <row>&nbsp;&nbsp;&nbsp;{{ $t('start.Func') }}:<el-input class="custom-input" :disabled="notAutoFunc"
           v-model="functions" style="width: 500px;"></el-input></row>
+      <!-- 复制 -->
+      <row><el-button @click="handleCopy" style="margin-left: 10px; margin-bottom: 9px;">复制</el-button></row>
       <br>
       <row v-if="notAutoFunc">&nbsp;&nbsp;&nbsp;{{ $t('start.r2Goal') }}:<el-input class="custom-input"
           v-model="Goal"></el-input></row>
@@ -116,7 +118,6 @@
           :on-preview="handlePictureCardPreview" :on-remove="handleUploadRemove2">
           <el-button type="primary">{{ $t('start.uploadButton') }}</el-button>
           <br>
-
           <template #tip>
             <div slot="tip" class="el-upload__tip">{{ $t('start.uploadInfo') }}</div>
           </template>
@@ -140,7 +141,6 @@
           <el-table-column prop="y" :label="$t('start.yLabel')" width="180" />
           <el-table-column prop="cir" :label="$t('start.cirLabel')" width="180" />
           <el-table-column :label="$t('start.options')" width="180">
-
             <template #default="scope"><el-button size="small" type="danger" @click="delpoint2(scope.row.id)">{{
       $t('start.delete') }}</el-button></template>
           </el-table-column>
@@ -174,7 +174,8 @@
 <script>
 import { connectWebSocket, sampleWebSocket } from '@/axios';
 import chartpointsmap from '@/components/chartspoints.vue'
-
+import { ref  } from 'vue';
+import useClipboard from 'vue-clipboard3';
 
 function getNumber(theNumber) {
   if (theNumber > 0) {
@@ -206,7 +207,7 @@ export default {
       pointsid: 0,//点的个数
       points: [], // 存储标点的坐标
       circle: 5,//滑块半径
-      functions: null,
+      // functions: null,
       xValue: [],
       Goal: '0.95',
       iteration: '20000',
@@ -251,6 +252,25 @@ export default {
   },
 
   mounted() {
+  },
+
+  setup() {
+    const functions = ref(null);
+    const { toClipboard } = useClipboard();
+
+    const handleCopy = async () => {
+      try {
+        await toClipboard(functions.value);
+        console.log('复制成功');
+      } catch (e) {
+        console.error('复制失败', e);
+      }
+    };
+
+    return {
+      functions,
+      handleCopy
+    };
   },
 
   methods: {

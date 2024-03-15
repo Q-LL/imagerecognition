@@ -27,6 +27,7 @@
     "unplugin-vue-components": "^0.25.2",
     "util": "^0.12.5",
     "vue": "^3.2.13",
+    "vue-clipboard3": "^2.0.0",
     "vue-i18n": "^9.10.1",
     "vue-material-design-icons": "^5.3.0",
     "vue-router": "^4.0.3",
