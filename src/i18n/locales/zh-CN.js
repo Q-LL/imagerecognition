@@ -35,6 +35,10 @@ export default{
     lineFunc:"直线方程",
     dataDownload:"下载数据",
     result:"结果",
+
+    startbuttun:"开始处理",
+    inhandle:'正在处理',
+    compelet:'处理完成'
   },
 
 };

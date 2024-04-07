@@ -35,6 +35,10 @@ export default{
     lineFunc:"linear equation",
     dataDownload:"Data download",
     result:"Result",
+
+    startbuttun:"Go!",
+    inhandle:'Processing!',
+    compelet:'Completed!'
   },
 
 };

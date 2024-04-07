@@ -91,9 +91,7 @@
         <el-progress :percentage="Math.round(autoFuncProgress * 100)" />
       </div>
       <div>
-        <el-button @click="makedata()" :loading="loading" :disabled="loading || pointsid == 0" :type="buttontype">{{
-      buttonText
-    }}</el-button>
+        <el-button @click="makedata()" :loading="loading" :disabled="loading || pointsid == 0" :type="buttontype">{{$t(buttonText)}}</el-button>
       </div>
     </div>
 
@@ -231,7 +229,7 @@ export default {
       //处理按钮
       buttontype: 'primary',
       loading: false,
-      buttonText: '开始处理',
+      buttonText: 'start.startbuttun',
 
       // sample数据区
       proofImage2: null,
@@ -484,7 +482,7 @@ export default {
           this.socket = socket;
           //按钮
           this.loading = true;
-          this.buttonText = '正在处理';
+          this.buttonText = 'start.inhandle';
           this.buttontype = 'warning';
           this.socket.onmessage = event => {
             //console.log(event.data);
@@ -517,7 +515,7 @@ export default {
           this.socket.onclose = () => {
             this.loading = false;
             this.buttontype = 'success';
-            this.buttonText = '处理完成';
+            this.buttonText = 'start.compelet';
           }
         })
         .catch(error => {
@@ -625,7 +623,7 @@ export default {
     nextstep() {
       this.buttontype = 'primary';
       this.loading = false;
-      this.buttonText = '开始处理';
+      this.buttonText = 'start.startbuttun';
       this.steps = this.steps + 1;
       if (this.steps == 2 && this.scale == null) {
         this.$nextTick(() => {
@@ -639,7 +637,7 @@ export default {
     laststep() {
       this.buttontype = 'primary';
       this.loading = false;
-      this.buttonText = '开始处理';
+      this.buttonText = 'start.startbuttun';
       this.steps = this.steps - 1;
     }
 
